@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">聖地巡礼カメラ</string>
+    <string name="load_screenshot">読込</string>
+    <string name="transparency">透明度</string>
+    <string name="mirror">反転</string>
+    <string name="reset">リセット</string>
+    <string name="grid">グリッド</string>
+    <string name="settings">設定</string>
+    <string name="photo_saved">写真を保存しました</string>
+    <string name="photo_failed">写真の保存に失敗しました</string>
+    <string name="permission_denied">カメラとストレージの権限が必要です</string>
+    <string name="camera_start_failed">カメラの起動に失敗しました</string>
+    <string name="title_activity_settings">設定</string>
+    <string name="pref_header_general">一般</string>
+    <string name="pref_title_language">言語</string>
+    <string name="pref_dialog_title_language">言語を選択</string>
+    <string name="pref_lang_default">システムデフォルト</string>
+    <string name="pref_header_about">アプリについて</string>
+    <string name="pref_title_version">バージョン</string>
+</resources>

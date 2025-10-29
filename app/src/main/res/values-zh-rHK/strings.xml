@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">聖地巡禮相機</string>
+    <string name="load_screenshot">載入截圖</string>
+    <string name="transparency">透明度</string>
+    <string name="mirror">鏡像</string>
+    <string name="reset">重設</string>
+    <string name="grid">網格</string>
+    <string name="settings">設定</string>
+    <string name="photo_saved">相片已儲存</string>
+    <string name="photo_failed">相片儲存失敗</string>
+    <string name="permission_denied">必須授予相機和儲存權限</string>
+    <string name="camera_start_failed">相機啟動失敗</string>
+    <string name="title_activity_settings">設定</string>
+    <string name="pref_header_general">通用</string>
+    <string name="pref_title_language">語言</string>
+    <string name="pref_dialog_title_language">選擇語言</string>
+    <string name="pref_lang_default">跟隨系統</string>
+    <string name="pref_header_about">關於</string>
+    <string name="pref_title_version">版本</string>
+</resources>
