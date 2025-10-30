@@ -13,28 +13,124 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:background="#111">
+        android:background="#111"
+        android:clipChildren="false"> <androidx.camera.view.PreviewView
+        android:id="@+id/camera_preview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
-        <androidx.camera.view.PreviewView
-            android:id="@+id/camera_preview"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-
-        <ImageView
-            android:id="@+id/overlay_image_view"
+        <FrameLayout
+            android:id="@+id/overlay_container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:scaleType="fitCenter"
-            android:visibility="gone"
-            tools:src="@tools:sample/avatars"
-            tools:visibility="visible"
-            tools:alpha="0.5" />
+            android:clipChildren="false">
+
+            <ImageView
+                android:id="@+id/overlay_image_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="fitCenter"
+                android:visibility="gone"
+                tools:src="@tools:sample/avatars"
+                tools:visibility="visible"
+                tools:alpha="0.5" />
+
+            <View
+                android:id="@+id/overlay_border"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/shape_transform_border"
+                android:visibility="gone" />
+
+            <ImageView
+                android:id="@+id/handle_top_left"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:padding="4dp"
+                android:layout_gravity="top|start"
+                android:src="@drawable/ic_handle_corner"
+                android:visibility="gone" />
+
+            <ImageView
+                android:id="@+id/handle_top_right"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:padding="4dp"
+                android:layout_gravity="top|end"
+                android:src="@drawable/ic_handle_corner"
+                android:visibility="gone" />
+
+            <ImageView
+                android:id="@+id/handle_bottom_left"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:padding="4dp"
+                android:layout_gravity="bottom|start"
+                android:src="@drawable/ic_handle_corner"
+                android:visibility="gone" />
+
+            <ImageView
+                android:id="@+id/handle_bottom_right"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:padding="4dp"
+                android:layout_gravity="bottom|end"
+                android:src="@drawable/ic_handle_corner"
+                android:visibility="gone" />
+
+            <ImageView
+                android:id="@+id/handle_rotate"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_gravity="bottom|end"
+                android:src="@drawable/ic_handle_rotate"
+                android:visibility="gone"
+                android:layout_marginBottom="-32dp"
+                android:layout_marginEnd="-32dp"
+                />
+
+        </FrameLayout>
 
         <com.tnt.seichicamera.GridView
             android:id="@+id/grid_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:visibility="gone" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:background="#80000000"
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/settings_button"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/ic_settings_24"
+                style="@style/CameraControlButton" />
+
+            <ImageButton
+                android:id="@+id/flash_button"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/ic_flash_off_24"
+                style="@style/CameraControlButton" />
+
+            <ImageButton
+                android:id="@+id/grid_button"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/ic_grid_on_24"
+                style="@style/CameraControlButton" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1"/>
+
+        </LinearLayout>
 
     </FrameLayout>
 
@@ -80,24 +176,23 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/transparency_slider" />
 
-        <Button
-            android:id="@+id/load_image_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/load_screenshot"
+        <ImageButton
+            android:id="@+id/gallery_button"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:src="@drawable/ic_image_24"
+            style="@style/CameraControlButton"
             app:layout_constraintBottom_toBottomOf="@id/capture_button"
             app:layout_constraintEnd_toStartOf="@id/capture_button"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@id/capture_button" />
 
         <ImageButton
-            android:id="@+id/settings_button"
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:src="@drawable/ic_settings_24"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:tintMode="src_in"
-            app:tint="#FFF"
+            android:id="@+id/flip_camera_button"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:src="@drawable/ic_flip_camera_24"
+            style="@style/CameraControlButton"
             app:layout_constraintTop_toTopOf="@id/capture_button"
             app:layout_constraintBottom_toBottomOf="@id/capture_button"
             app:layout_constraintStart_toEndOf="@id/capture_button"
@@ -113,6 +208,14 @@
             app:layout_constraintBottom_toBottomOf="parent">
 
             <Button
+                android:id="@+id/load_image_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/load_screenshot"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_marginEnd="8dp"/>
+
+            <Button
                 android:id="@+id/mirror_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -124,13 +227,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/reset"
-                style="?attr/materialButtonOutlinedStyle"
-                android:layout_marginEnd="8dp"/>
-            <Button
-                android:id="@+id/grid_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/grid"
                 style="?attr/materialButtonOutlinedStyle" />
         </LinearLayout>
 

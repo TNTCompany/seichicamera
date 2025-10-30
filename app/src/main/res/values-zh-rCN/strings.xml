@@ -17,4 +17,12 @@
     <string name="pref_lang_default">跟随系统</string>
     <string name="pref_header_about">关于</string>
     <string name="pref_title_version">版本</string>
+
+    <string name="gallery">相册</string>
+    <string name="flip_camera">翻转镜头</string>
+    <string name="flash_on">闪光灯：开</string>
+    <string name="flash_off">闪光灯：关</string>
+    <string name="tap_to_focus">点击对焦</string>
+    <string name="pref_title_save_grid">保存网格线状态</string>
+    <string name="pref_summary_save_grid">启动应用时自动显示网格线</string>
 </resources>
