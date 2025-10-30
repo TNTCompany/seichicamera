@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="CameraControlButton" parent="Widget.AppCompat.ImageButton">
+        <item name="android:background">?attr/selectableItemBackgroundBorderless</item>
+        <item name="android:tintMode">src_in</item>
+        <item name="android:tint">#FFFFFF</item>
+        <item name="android:padding">8dp</item>
+    </style>
+</resources>
