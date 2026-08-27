@@ -17,6 +17,7 @@
     <string name="pref_lang_default">跟随系统</string>
     <string name="pref_header_about">关于</string>
     <string name="pref_title_version">版本</string>
+    <string name="version_number">2.0.0</string>
 
     <string name="gallery">相册</string>
     <string name="flip_camera">翻转镜头</string>
@@ -35,8 +36,14 @@
     <string name="generate_comparison">生成对比图</string>
     <string name="navigate_to">导航</string>
     <string name="shoot_with_image">用这张图拍摄</string>
-    <string name="data_source_anitabi">数据来源：Anitabi</string>
+    <string name="data_source">数据来源</string>
+    <string name="data_source_anitabi">Anitabi (CC BY-NC-SA 4.0)</string>
     <string name="offline_cache">离线缓存</string>
     <string name="clear_all_cache">清除所有缓存</string>
+    <string name="clear_all_cache_confirm_title">清除所有缓存？</string>
+    <string name="clear_all_cache_confirm_message">这将删除所有离线数据。</string>
+    <string name="clear_all">清除全部</string>
+    <string name="delete_cache">删除缓存</string>
     <string name="no_cached_data">暂无缓存数据</string>
+    <string name="cancel">取消</string>
 </resources>

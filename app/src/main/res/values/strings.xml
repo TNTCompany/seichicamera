@@ -19,7 +19,7 @@
 
     <string name="pref_header_about">About</string>
     <string name="pref_title_version">Version</string>
-    <string name="version_number">1.1.0</string>
+    <string name="version_number">2.0.0</string>
 
     <string name="gallery">Gallery</string>
     <string name="flip_camera">Flip Camera</string>
@@ -38,8 +38,14 @@
     <string name="generate_comparison">Generate Comparison</string>
     <string name="navigate_to">Navigate</string>
     <string name="shoot_with_image">Shoot with Image</string>
-    <string name="data_source_anitabi">Data: Anitabi</string>
+    <string name="data_source">Data Source</string>
+    <string name="data_source_anitabi">Anitabi (CC BY-NC-SA 4.0)</string>
     <string name="offline_cache">Offline Cache</string>
     <string name="clear_all_cache">Clear All Cache</string>
+    <string name="clear_all_cache_confirm_title">Clear All Cache?</string>
+    <string name="clear_all_cache_confirm_message">This will delete all offline data.</string>
+    <string name="clear_all">Clear All</string>
+    <string name="delete_cache">Delete Cache</string>
     <string name="no_cached_data">No cached data</string>
+    <string name="cancel">Cancel</string>
 </resources>

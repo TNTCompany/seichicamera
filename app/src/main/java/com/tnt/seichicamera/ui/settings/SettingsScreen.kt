@@ -29,10 +29,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.tnt.seichicamera.R
 import com.tnt.seichicamera.util.LocaleHelper
 
 @Composable
@@ -52,7 +54,7 @@ fun SettingsScreen(
         // Language section
         item {
             Text(
-                "General",
+                stringResource(R.string.pref_header_general),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
@@ -60,9 +62,14 @@ fun SettingsScreen(
         }
         item {
             val currentLang = LocaleHelper.languages.find { it.tag == uiState.currentLocaleTag }
+            val currentLangDisplayName = if (uiState.currentLocaleTag.isEmpty()) {
+                stringResource(R.string.pref_lang_default)
+            } else {
+                currentLang?.displayName ?: stringResource(R.string.pref_lang_default)
+            }
             ListItem(
-                headlineContent = { Text("Language") },
-                supportingContent = { Text(currentLang?.displayName ?: "System Default") },
+                headlineContent = { Text(stringResource(R.string.pref_title_language)) },
+                supportingContent = { Text(currentLangDisplayName) },
                 modifier = Modifier.clickable { showLanguageDialog = true }
             )
             HorizontalDivider()
@@ -77,14 +84,17 @@ fun SettingsScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    "Offline Cache",
+                    stringResource(R.string.offline_cache),
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.weight(1f)
                 )
                 if (uiState.cachedBangumis.isNotEmpty()) {
                     IconButton(onClick = { showClearAllDialog = true }) {
-                        Icon(Icons.Default.DeleteSweep, "Clear all")
+                        Icon(
+                            Icons.Default.DeleteSweep,
+                            contentDescription = stringResource(R.string.clear_all_cache)
+                        )
                     }
                 }
             }
@@ -93,7 +103,7 @@ fun SettingsScreen(
         if (uiState.cachedBangumis.isEmpty()) {
             item {
                 Text(
-                    "No cached data",
+                    stringResource(R.string.no_cached_data),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(horizontal = 16.dp)
@@ -106,7 +116,10 @@ fun SettingsScreen(
                     supportingContent = { Text("ID: ${bangumi.id}") },
                     trailingContent = {
                         IconButton(onClick = { viewModel.clearCache(bangumi.id) }) {
-                            Icon(Icons.Default.Delete, "Delete cache")
+                            Icon(
+                                Icons.Default.Delete,
+                                contentDescription = stringResource(R.string.delete_cache)
+                            )
                         }
                     }
                 )
@@ -117,17 +130,22 @@ fun SettingsScreen(
         item {
             Spacer(Modifier.height(16.dp))
             Text(
-                "About",
+                stringResource(R.string.pref_header_about),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
             )
         }
-        item { ListItem(headlineContent = { Text("Version") }, supportingContent = { Text("2.0.0") }) }
         item {
             ListItem(
-                headlineContent = { Text("Data Source") },
-                supportingContent = { Text("Anitabi (CC BY-NC-SA 4.0)") }
+                headlineContent = { Text(stringResource(R.string.pref_title_version)) },
+                supportingContent = { Text(stringResource(R.string.version_number)) }
+            )
+        }
+        item {
+            ListItem(
+                headlineContent = { Text(stringResource(R.string.data_source)) },
+                supportingContent = { Text(stringResource(R.string.data_source_anitabi)) }
             )
         }
     }
@@ -136,10 +154,15 @@ fun SettingsScreen(
     if (showLanguageDialog) {
         AlertDialog(
             onDismissRequest = { showLanguageDialog = false },
-            title = { Text("Choose Language") },
+            title = { Text(stringResource(R.string.pref_dialog_title_language)) },
             text = {
                 Column {
                     LocaleHelper.languages.forEach { lang ->
+                        val displayName = if (lang.tag.isEmpty()) {
+                            stringResource(R.string.pref_lang_default)
+                        } else {
+                            lang.displayName
+                        }
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -157,12 +180,16 @@ fun SettingsScreen(
                                     showLanguageDialog = false
                                 }
                             )
-                            Text(lang.displayName, modifier = Modifier.padding(start = 8.dp))
+                            Text(displayName, modifier = Modifier.padding(start = 8.dp))
                         }
                     }
                 }
             },
-            confirmButton = { TextButton(onClick = { showLanguageDialog = false }) { Text("Cancel") } }
+            confirmButton = {
+                TextButton(onClick = { showLanguageDialog = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
         )
     }
 
@@ -170,15 +197,17 @@ fun SettingsScreen(
     if (showClearAllDialog) {
         AlertDialog(
             onDismissRequest = { showClearAllDialog = false },
-            title = { Text("Clear All Cache?") },
-            text = { Text("This will delete all offline data.") },
+            title = { Text(stringResource(R.string.clear_all_cache_confirm_title)) },
+            text = { Text(stringResource(R.string.clear_all_cache_confirm_message)) },
             confirmButton = {
                 TextButton(onClick = { viewModel.clearAllCache(); showClearAllDialog = false }) {
-                    Text("Clear All")
+                    Text(stringResource(R.string.clear_all))
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showClearAllDialog = false }) { Text("Cancel") }
+                TextButton(onClick = { showClearAllDialog = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
             }
         )
     }

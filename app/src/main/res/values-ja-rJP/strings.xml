@@ -17,6 +17,7 @@
     <string name="pref_lang_default">システムデフォルト</string>
     <string name="pref_header_about">アプリについて</string>
     <string name="pref_title_version">バージョン</string>
+    <string name="version_number">2.0.0</string>
 
     <string name="gallery">アルバム</string>
     <string name="flip_camera">カメラ切替</string>
@@ -35,8 +36,14 @@
     <string name="generate_comparison">比較画像を生成</string>
     <string name="navigate_to">ナビ</string>
     <string name="shoot_with_image">この画像で撮影</string>
-    <string name="data_source_anitabi">データ：Anitabi</string>
+    <string name="data_source">データソース</string>
+    <string name="data_source_anitabi">Anitabi (CC BY-NC-SA 4.0)</string>
     <string name="offline_cache">オフラインキャッシュ</string>
     <string name="clear_all_cache">キャッシュをすべて削除</string>
+    <string name="clear_all_cache_confirm_title">すべてのキャッシュを削除しますか？</string>
+    <string name="clear_all_cache_confirm_message">すべてのオフラインデータが削除されます。</string>
+    <string name="clear_all">すべて削除</string>
+    <string name="delete_cache">キャッシュを削除</string>
     <string name="no_cached_data">キャッシュデータなし</string>
+    <string name="cancel">キャンセル</string>
 </resources>
