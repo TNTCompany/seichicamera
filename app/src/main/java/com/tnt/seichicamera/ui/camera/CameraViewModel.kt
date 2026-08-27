@@ -69,4 +69,61 @@ class CameraViewModel @Inject constructor() : ViewModel() {
     fun setHasFlash(hasFlash: Boolean) {
         _uiState.update { it.copy(hasFlash = hasFlash) }
     }
+
+    private val _overlayState = MutableStateFlow(OverlayState())
+    val overlayState: StateFlow<OverlayState> = _overlayState.asStateFlow()
+
+    fun setOverlayImage(uri: Uri) {
+        _overlayState.update {
+            it.copy(imageUri = uri, isEditing = false)
+        }
+    }
+
+    fun setOverlayImageUrls(urls: List<String>, startIndex: Int = 0) {
+        _overlayState.update {
+            it.copy(imageUrls = urls, currentImageIndex = startIndex, imageUri = null)
+        }
+    }
+
+    fun updateOverlayTransform(translationX: Float, translationY: Float, scale: Float, rotation: Float) {
+        _overlayState.update {
+            it.copy(translationX = translationX, translationY = translationY, scale = scale, rotation = rotation)
+        }
+    }
+
+    fun setOverlayAlpha(alpha: Float) {
+        _overlayState.update { it.copy(alpha = alpha) }
+    }
+
+    fun toggleMirror() {
+        _overlayState.update { it.copy(isMirrored = !it.isMirrored) }
+    }
+
+    fun resetOverlay() {
+        _overlayState.update {
+            it.copy(
+                alpha = 0.5f, translationX = 0f, translationY = 0f,
+                scale = 1f, rotation = 0f, isMirrored = false
+            )
+        }
+    }
+
+    fun nextImage() {
+        _overlayState.update {
+            val next = (it.currentImageIndex + 1).coerceAtMost(it.imageUrls.size - 1)
+            it.copy(currentImageIndex = next)
+        }
+    }
+
+    fun prevImage() {
+        _overlayState.update {
+            val prev = (it.currentImageIndex - 1).coerceAtLeast(0)
+            it.copy(currentImageIndex = prev)
+        }
+    }
+
+    fun toggleEditing() {
+        _overlayState.update { it.copy(isEditing = !it.isEditing) }
+    }
 }
+

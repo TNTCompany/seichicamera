@@ -5,6 +5,9 @@ import android.os.Build
 import android.provider.MediaStore
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
@@ -36,6 +39,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -65,8 +69,26 @@ fun CameraScreen(
     viewModel: CameraViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val overlayState by viewModel.overlayState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
+
+    // Image picker launcher
+    val pickMediaLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        uri?.let { viewModel.setOverlayImage(it) }
+    }
+
+    // Initialize overlay from nav args
+    LaunchedEffect(imageUrls) {
+        if (imageUrls.isNotBlank()) {
+            val urls = imageUrls.split(",").filter { it.isNotBlank() }
+            if (urls.isNotEmpty()) {
+                viewModel.setOverlayImageUrls(urls)
+            }
+        }
+    }
 
     var imageCapture by remember { mutableStateOf<ImageCapture?>(null) }
     var cameraProvider by remember { mutableStateOf<ProcessCameraProvider?>(null) }
@@ -133,7 +155,22 @@ fun CameraScreen(
                 GridOverlay(modifier = aspectModifier)
             }
 
-            // Overlay image will be added in Task 7
+            // Image overlay
+            ImageOverlay(
+                state = overlayState,
+                onTransform = { tx, ty, s, r -> viewModel.updateOverlayTransform(tx, ty, s, r) },
+                onAlphaChange = { viewModel.setOverlayAlpha(it) },
+                onMirror = { viewModel.toggleMirror() },
+                onReset = { viewModel.resetOverlay() },
+                onPickImage = {
+                    pickMediaLauncher.launch(
+                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                    )
+                },
+                onNextImage = { viewModel.nextImage() },
+                onPrevImage = { viewModel.prevImage() },
+                onTapOverlay = { viewModel.toggleEditing() }
+            )
         }
 
         // Top toolbar
