@@ -13,6 +13,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 
 import com.tnt.seichicamera.ui.camera.CameraScreen
+import com.tnt.seichicamera.ui.map.MapScreen
 
 @Composable
 fun NavGraph(
@@ -25,10 +26,7 @@ fun NavGraph(
         modifier = modifier
     ) {
         composable(Screen.Map.route) {
-            // Placeholder — will be replaced in Task 8
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("🗺️ Map Screen")
-            }
+            MapScreen(navController = navController)
         }
 
         composable(
