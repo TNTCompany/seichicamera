@@ -4,13 +4,16 @@
 
     <uses-feature android:name="android.hardware.camera.any" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
 
     <application
-        android:name=".MyApplication"
+        android:name=".SeichiCameraApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -21,30 +24,18 @@
         android:theme="@style/Theme.SeichiCamera"
         tools:targetApi="31">
 
-        <!-- [修复] 这是您的 MainActivity -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|locale|layoutDirection"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.SeichiCamera"
             tools:ignore="LockedOrientationActivity">
-
-            <!-- [修复] 必须添加这个 intent-filter 标签！ -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <!-- [修复] 添加结束 -->
-
         </activity>
-
-        <!-- 这是您的 SettingsActivity (保持不变) -->
-        <activity
-            android:name=".SettingsActivity"
-            android:exported="false"
-            android:label="@string/title_activity_settings"
-            android:parentActivityName=".MainActivity" />
 
     </application>
 
