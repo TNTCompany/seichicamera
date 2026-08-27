@@ -12,6 +12,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 
+import com.tnt.seichicamera.ui.camera.CameraScreen
+
 @Composable
 fun NavGraph(
     navController: NavHostController,
@@ -38,10 +40,11 @@ fun NavGraph(
         ) { backStackEntry ->
             val imageUrls = backStackEntry.arguments?.getString("imageUrls") ?: ""
             val pointId = backStackEntry.arguments?.getString("pointId") ?: ""
-            // Placeholder — will be replaced in Task 6
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("📷 Camera Screen\nimageUrls=$imageUrls\npointId=$pointId")
-            }
+            CameraScreen(
+                navController = navController,
+                imageUrls = imageUrls,
+                pointId = pointId
+            )
         }
 
         composable(Screen.Settings.route) {
