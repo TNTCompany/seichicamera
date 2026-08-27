@@ -34,13 +34,17 @@
     <string name="nav_camera">Camera</string>
     <string name="nav_settings">Settings</string>
     <string name="search_bangumi">Search Bangumi ID</string>
+    <string name="search">Search</string>
     <string name="check_in">Check In</string>
+    <string name="checked_in">Checked in</string>
     <string name="generate_comparison">Generate Comparison</string>
     <string name="navigate_to">Navigate</string>
     <string name="shoot_with_image">Shoot with Image</string>
+    <string name="reference_images">Reference Images</string>
     <string name="data_source">Data Source</string>
     <string name="data_source_anitabi">Anitabi (CC BY-NC-SA 4.0)</string>
     <string name="offline_cache">Offline Cache</string>
+    <string name="download_offline">Download for offline</string>
     <string name="clear_all_cache">Clear All Cache</string>
     <string name="clear_all_cache_confirm_title">Clear All Cache?</string>
     <string name="clear_all_cache_confirm_message">This will delete all offline data.</string>
@@ -48,4 +52,7 @@
     <string name="delete_cache">Delete Cache</string>
     <string name="no_cached_data">No cached data</string>
     <string name="cancel">Cancel</string>
+    <string name="close">Close</string>
+    <string name="capture">Capture</string>
+    <string name="share_comparison">Share comparison</string>
 </resources>

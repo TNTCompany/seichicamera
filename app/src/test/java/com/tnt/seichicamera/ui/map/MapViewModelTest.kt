@@ -187,6 +187,50 @@ class MapViewModelTest {
         assertEquals(listOf("p1", "p2"), viewModel.checkedInPointIds.value)
     }
 
+    @Test
+    fun `downloadOfflineCache does nothing when no bangumi loaded`() = runTest(testDispatcher) {
+        viewModel.downloadOfflineCache()
+        advanceUntilIdle()
+
+        assertFalse(viewModel.uiState.value.isLoading)
+        assertNull(viewModel.uiState.value.error)
+        assertNull(fakeBangumiRepository.lastCachedSubjectId)
+    }
+
+    @Test
+    fun `downloadOfflineCache succeeds and resets loading`() = runTest(testDispatcher) {
+        fakeBangumiRepository.resultToReturn = Result.success(testBangumi to testPoints)
+        viewModel.onSearchQueryChanged("253")
+        viewModel.searchBangumi()
+        advanceUntilIdle()
+
+        fakeBangumiRepository.cacheResultToReturn = Result.success(Unit)
+        viewModel.downloadOfflineCache()
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertFalse(state.isLoading)
+        assertNull(state.error)
+        assertEquals(253, fakeBangumiRepository.lastCachedSubjectId)
+    }
+
+    @Test
+    fun `downloadOfflineCache fails and sets error`() = runTest(testDispatcher) {
+        fakeBangumiRepository.resultToReturn = Result.success(testBangumi to testPoints)
+        viewModel.onSearchQueryChanged("253")
+        viewModel.searchBangumi()
+        advanceUntilIdle()
+
+        fakeBangumiRepository.cacheResultToReturn = Result.failure(RuntimeException("Network error"))
+        viewModel.downloadOfflineCache()
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertFalse(state.isLoading)
+        assertEquals("Cache failed: Network error", state.error)
+        assertEquals(253, fakeBangumiRepository.lastCachedSubjectId)
+    }
+
     // --- Fake Test Implementations ---
 
     private class FakeBangumiRepository : BangumiRepository(
@@ -211,9 +255,16 @@ class MapViewModelTest {
     ) {
         var resultToReturn: Result<Pair<Bangumi, List<SacredPoint>>> =
             Result.failure(IllegalStateException("Not configured"))
+        var cacheResultToReturn: Result<Unit> = Result.success(Unit)
+        var lastCachedSubjectId: Int? = null
 
         override suspend fun getBangumiPoints(subjectId: Int): Result<Pair<Bangumi, List<SacredPoint>>> {
             return resultToReturn
+        }
+
+        override suspend fun cacheOffline(subjectId: Int): Result<Unit> {
+            lastCachedSubjectId = subjectId
+            return cacheResultToReturn
         }
     }
 

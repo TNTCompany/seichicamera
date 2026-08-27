@@ -2,7 +2,6 @@ package com.tnt.seichicamera.ui.camera
 
 import android.net.Uri
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -22,8 +21,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.tnt.seichicamera.R
 
 @Composable
 fun PostCaptureSheet(
@@ -39,7 +40,7 @@ fun PostCaptureSheet(
             .fillMaxWidth()
             .padding(16.dp)
     ) {
-        Text("Photo Saved!", style = MaterialTheme.typography.titleLarge)
+        Text(stringResource(R.string.photo_saved), style = MaterialTheme.typography.titleLarge)
         Spacer(Modifier.height(12.dp))
 
         AsyncImage(
@@ -61,7 +62,7 @@ fun PostCaptureSheet(
             ) {
                 Icon(Icons.Default.CheckCircle, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
-                Text("Check In ✅")
+                Text(stringResource(R.string.check_in))
             }
             Spacer(Modifier.height(8.dp))
         }
@@ -73,7 +74,7 @@ fun PostCaptureSheet(
         ) {
             Icon(Icons.Default.Compare, contentDescription = null)
             Spacer(Modifier.width(8.dp))
-            Text("Generate Comparison 🖼️")
+            Text(stringResource(R.string.generate_comparison))
         }
 
         Spacer(Modifier.height(8.dp))
@@ -84,7 +85,7 @@ fun PostCaptureSheet(
         ) {
             Icon(Icons.Default.Close, contentDescription = null)
             Spacer(Modifier.width(4.dp))
-            Text("Close")
+            Text(stringResource(R.string.close))
         }
     }
 }

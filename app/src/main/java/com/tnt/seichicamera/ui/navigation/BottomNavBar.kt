@@ -6,6 +6,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 
@@ -21,8 +22,8 @@ fun BottomNavBar(navController: NavController) {
                 else -> currentRoute == screen.route
             }
             NavigationBarItem(
-                icon = { Icon(screen.icon, contentDescription = screen.label) },
-                label = { Text(screen.label) },
+                icon = { Icon(screen.icon, contentDescription = stringResource(screen.labelRes)) },
+                label = { Text(stringResource(screen.labelRes)) },
                 selected = selected,
                 onClick = {
                     val targetRoute = when (screen) {

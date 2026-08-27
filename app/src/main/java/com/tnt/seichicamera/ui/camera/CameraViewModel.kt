@@ -7,6 +7,7 @@ import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.tnt.seichicamera.R
 import com.tnt.seichicamera.data.repository.CheckInRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -171,7 +172,7 @@ class CameraViewModel @Inject constructor(
                     putExtra(Intent.EXTRA_STREAM, uri)
                     addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 }
-                context.startActivity(Intent.createChooser(shareIntent, "Share comparison"))
+                context.startActivity(Intent.createChooser(shareIntent, context.getString(R.string.share_comparison)))
             }
         }
     }

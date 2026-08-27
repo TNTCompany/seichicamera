@@ -81,6 +81,22 @@ class MapViewModel @Inject constructor(
         _uiState.update { it.copy(selectedPoint = point) }
     }
 
+    fun downloadOfflineCache() {
+        val subjectId = _uiState.value.bangumi?.id ?: return
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            val result = bangumiRepository.cacheOffline(subjectId)
+            result.fold(
+                onSuccess = {
+                    _uiState.update { it.copy(isLoading = false, error = null) }
+                },
+                onFailure = { e ->
+                    _uiState.update { it.copy(isLoading = false, error = "Cache failed: ${e.message}") }
+                }
+            )
+        }
+    }
+
     fun clearError() {
         _uiState.update { it.copy(error = null) }
     }

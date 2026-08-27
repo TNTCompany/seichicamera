@@ -51,10 +51,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.tnt.seichicamera.R
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
@@ -201,7 +203,7 @@ fun CameraScreen(
                 IconButton(onClick = { viewModel.toggleGrid() }) {
                     Icon(
                         Icons.Default.GridOn,
-                        contentDescription = "Grid",
+                        contentDescription = stringResource(R.string.grid),
                         tint = if (uiState.showGrid) Color.Yellow else Color.White
                     )
                 }
@@ -212,7 +214,10 @@ fun CameraScreen(
                         Icon(
                             if (uiState.flashMode == ImageCapture.FLASH_MODE_ON)
                                 Icons.Default.FlashOn else Icons.Default.FlashOff,
-                            contentDescription = "Flash",
+                            contentDescription = stringResource(
+                                if (uiState.flashMode == ImageCapture.FLASH_MODE_ON)
+                                    R.string.flash_on else R.string.flash_off
+                            ),
                             tint = Color.White
                         )
                     }
@@ -220,7 +225,11 @@ fun CameraScreen(
 
                 // Flip camera
                 IconButton(onClick = { viewModel.flipCamera() }) {
-                    Icon(Icons.Default.Cameraswitch, contentDescription = "Flip", tint = Color.White)
+                    Icon(
+                        Icons.Default.Cameraswitch,
+                        contentDescription = stringResource(R.string.flip_camera),
+                        tint = Color.White
+                    )
                 }
             }
         }
@@ -250,11 +259,11 @@ fun CameraScreen(
                     object : ImageCapture.OnImageSavedCallback {
                         override fun onImageSaved(output: ImageCapture.OutputFileResults) {
                             viewModel.onPhotoCaptured(output.savedUri)
-                            Toast.makeText(context, "Photo saved", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, context.getString(R.string.photo_saved), Toast.LENGTH_SHORT).show()
                         }
                         override fun onError(exception: ImageCaptureException) {
                             Log.e(TAG, "Capture failed", exception)
-                            Toast.makeText(context, "Capture failed", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, context.getString(R.string.photo_failed), Toast.LENGTH_SHORT).show()
                         }
                     }
                 )
@@ -264,7 +273,11 @@ fun CameraScreen(
                 .padding(bottom = 32.dp)
                 .size(72.dp)
         ) {
-            Icon(Icons.Default.CameraAlt, contentDescription = "Capture", modifier = Modifier.size(36.dp))
+            Icon(
+                Icons.Default.CameraAlt,
+                contentDescription = stringResource(R.string.capture),
+                modifier = Modifier.size(36.dp)
+            )
         }
 
         // Post-capture bottom sheet
@@ -277,7 +290,7 @@ fun CameraScreen(
                     pointId = viewModel.pointId.ifBlank { null },
                     onCheckIn = {
                         viewModel.checkIn(context)
-                        Toast.makeText(context, "Checked in! ✅", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, context.getString(R.string.checked_in), Toast.LENGTH_SHORT).show()
                         viewModel.clearCapturedPhoto()
                     },
                     onGenerateComparison = {

@@ -31,9 +31,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.tnt.seichicamera.R
 import com.tnt.seichicamera.domain.model.SacredPoint
 
 @Composable
@@ -57,7 +59,11 @@ fun PointDetailSheet(
                 modifier = Modifier.weight(1f)
             )
             if (isCheckedIn) {
-                Icon(Icons.Default.CheckCircle, "Checked in", tint = Color(0xFF4CAF50))
+                Icon(
+                    Icons.Default.CheckCircle,
+                    contentDescription = stringResource(R.string.checked_in),
+                    tint = Color(0xFF4CAF50)
+                )
             }
         }
 
@@ -73,7 +79,7 @@ fun PointDetailSheet(
 
         // Reference images
         if (point.imageUrls.isNotEmpty()) {
-            Text("Reference Images", style = MaterialTheme.typography.labelLarge)
+            Text(stringResource(R.string.reference_images), style = MaterialTheme.typography.labelLarge)
             Spacer(Modifier.height(8.dp))
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -103,7 +109,7 @@ fun PointDetailSheet(
             ) {
                 Icon(Icons.Default.Navigation, contentDescription = null)
                 Spacer(Modifier.width(4.dp))
-                Text("Navigate")
+                Text(stringResource(R.string.navigate_to))
             }
 
             Spacer(Modifier.width(8.dp))
@@ -113,7 +119,7 @@ fun PointDetailSheet(
                 modifier = Modifier.weight(1f),
                 enabled = point.imageUrls.isNotEmpty()
             ) {
-                Text("Shoot with Image")
+                Text(stringResource(R.string.shoot_with_image))
             }
         }
 
