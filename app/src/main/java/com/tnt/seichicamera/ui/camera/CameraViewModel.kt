@@ -1,14 +1,19 @@
 package com.tnt.seichicamera.ui.camera
 
+import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.tnt.seichicamera.data.repository.CheckInRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 enum class AspectRatioOption(val label: String, val ratioFloat: Float?) {
@@ -29,7 +34,9 @@ data class CameraUiState(
 )
 
 @HiltViewModel
-class CameraViewModel @Inject constructor() : ViewModel() {
+class CameraViewModel @Inject constructor(
+    private val checkInRepository: CheckInRepository
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(CameraUiState())
     val uiState: StateFlow<CameraUiState> = _uiState.asStateFlow()
@@ -131,6 +138,42 @@ class CameraViewModel @Inject constructor() : ViewModel() {
 
     fun toggleEditing() {
         _overlayState.update { it.copy(isEditing = !it.isEditing) }
+    }
+
+    private val _comparisonUri = MutableStateFlow<Uri?>(null)
+    val comparisonUri: StateFlow<Uri?> = _comparisonUri.asStateFlow()
+
+    fun checkIn(context: Context) {
+        val photoUri = _uiState.value.capturedPhotoUri ?: return
+        val pid = _pointId.ifBlank { return }
+        viewModelScope.launch {
+            checkInRepository.checkIn(
+                pointId = pid,
+                photoUri = photoUri.toString(),
+                comparisonUri = _comparisonUri.value?.toString()
+            )
+        }
+    }
+
+    fun generateComparison(context: Context) {
+        val photoUri = _uiState.value.capturedPhotoUri ?: return
+        val refSource: Any = _overlayState.value.imageUri
+            ?: _overlayState.value.currentImageUrl
+            ?: return
+
+        viewModelScope.launch {
+            val uri = ComparisonGenerator.generate(context, refSource, photoUri)
+            _comparisonUri.value = uri
+            if (uri != null) {
+                // Share intent
+                val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                    type = "image/jpeg"
+                    putExtra(Intent.EXTRA_STREAM, uri)
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+                context.startActivity(Intent.createChooser(shareIntent, "Share comparison"))
+            }
+        }
     }
 }
 

@@ -276,11 +276,12 @@ fun CameraScreen(
                     photoUri = uiState.capturedPhotoUri!!,
                     pointId = viewModel.pointId.ifBlank { null },
                     onCheckIn = {
-                        // Will be implemented in Task 11
+                        viewModel.checkIn(context)
+                        Toast.makeText(context, "Checked in! ✅", Toast.LENGTH_SHORT).show()
                         viewModel.clearCapturedPhoto()
                     },
                     onGenerateComparison = {
-                        // Will be implemented in Task 11
+                        viewModel.generateComparison(context)
                         viewModel.clearCapturedPhoto()
                     },
                     onDismiss = { viewModel.clearCapturedPhoto() }

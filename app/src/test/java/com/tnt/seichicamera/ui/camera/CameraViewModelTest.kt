@@ -1,9 +1,23 @@
 package com.tnt.seichicamera.ui.camera
 
+import android.content.Context
 import android.net.Uri
 import android.net.createTestUri
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
+import com.tnt.seichicamera.data.local.dao.CheckInDao
+import com.tnt.seichicamera.data.local.entity.CheckInEntity
+import com.tnt.seichicamera.data.repository.CheckInRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -11,14 +25,24 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class CameraViewModelTest {
 
+    private val testDispatcher = StandardTestDispatcher()
+    private lateinit var fakeCheckInRepository: FakeCheckInRepository
     private lateinit var viewModel: CameraViewModel
     private val dummyUri: Uri = createTestUri()
 
     @Before
     fun setUp() {
-        viewModel = CameraViewModel()
+        Dispatchers.setMain(testDispatcher)
+        fakeCheckInRepository = FakeCheckInRepository()
+        viewModel = CameraViewModel(fakeCheckInRepository)
+    }
+
+    @After
+    fun tearDown() {
+        Dispatchers.resetMain()
     }
 
     @Test
@@ -221,5 +245,76 @@ class CameraViewModelTest {
 
         viewModel.setHasFlash(true)
         assertTrue(viewModel.uiState.value.hasFlash)
+    }
+
+    @Test
+    fun `setPointId updates pointId`() {
+        assertEquals("", viewModel.pointId)
+        viewModel.setPointId("point_123")
+        assertEquals("point_123", viewModel.pointId)
+    }
+
+    @Test
+    fun `initial comparisonUri is null`() {
+        assertNull(viewModel.comparisonUri.value)
+    }
+
+    @Test
+    fun `checkIn saves check-in data to repository`() = runTest(testDispatcher) {
+        viewModel.setPointId("point_456")
+        viewModel.onPhotoCaptured(dummyUri)
+
+        // Pass a dummy Context or null-safe context if not used directly
+        val dummyContext = android.content.ContextWrapper(null)
+        viewModel.checkIn(dummyContext)
+        advanceUntilIdle()
+
+        assertEquals("point_456", fakeCheckInRepository.lastCheckedInPointId)
+        assertEquals(dummyUri.toString(), fakeCheckInRepository.lastPhotoUri)
+        assertNull(fakeCheckInRepository.lastComparisonUri)
+    }
+
+    @Test
+    fun `checkIn with blank pointId does nothing`() = runTest(testDispatcher) {
+        viewModel.setPointId("")
+        viewModel.onPhotoCaptured(dummyUri)
+
+        val dummyContext = android.content.ContextWrapper(null)
+        viewModel.checkIn(dummyContext)
+        advanceUntilIdle()
+
+        assertNull(fakeCheckInRepository.lastCheckedInPointId)
+    }
+
+    @Test
+    fun `checkIn with null capturedPhotoUri does nothing`() = runTest(testDispatcher) {
+        viewModel.setPointId("point_789")
+        viewModel.clearCapturedPhoto()
+
+        val dummyContext = android.content.ContextWrapper(null)
+        viewModel.checkIn(dummyContext)
+        advanceUntilIdle()
+
+        assertNull(fakeCheckInRepository.lastCheckedInPointId)
+    }
+
+    private class FakeCheckInRepository : CheckInRepository(
+        checkInDao = object : CheckInDao {
+            override suspend fun insert(checkIn: CheckInEntity): Long = 1L
+            override suspend fun getByPointId(pointId: String): CheckInEntity? = null
+            override fun getAllCheckedInPointIds(): Flow<List<String>> = flowOf(emptyList())
+            override fun getAllCheckIns(): Flow<List<CheckInEntity>> = flowOf(emptyList())
+        }
+    ) {
+        var lastCheckedInPointId: String? = null
+        var lastPhotoUri: String? = null
+        var lastComparisonUri: String? = null
+
+        override suspend fun checkIn(pointId: String, photoUri: String, comparisonUri: String?): Long {
+            lastCheckedInPointId = pointId
+            lastPhotoUri = photoUri
+            lastComparisonUri = comparisonUri
+            return 1L
+        }
     }
 }
