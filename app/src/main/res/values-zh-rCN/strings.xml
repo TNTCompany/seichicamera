@@ -25,4 +25,18 @@
     <string name="tap_to_focus">点击对焦</string>
     <string name="pref_title_save_grid">保存网格线状态</string>
     <string name="pref_summary_save_grid">启动应用时自动显示网格线</string>
+
+    <!-- New strings for v2 -->
+    <string name="nav_map">地图</string>
+    <string name="nav_camera">相机</string>
+    <string name="nav_settings">设置</string>
+    <string name="search_bangumi">搜索 Bangumi ID</string>
+    <string name="check_in">打卡</string>
+    <string name="generate_comparison">生成对比图</string>
+    <string name="navigate_to">导航</string>
+    <string name="shoot_with_image">用这张图拍摄</string>
+    <string name="data_source_anitabi">数据来源：Anitabi</string>
+    <string name="offline_cache">离线缓存</string>
+    <string name="clear_all_cache">清除所有缓存</string>
+    <string name="no_cached_data">暂无缓存数据</string>
 </resources>

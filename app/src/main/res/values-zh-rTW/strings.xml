@@ -17,4 +17,26 @@
     <string name="pref_lang_default">跟隨系統</string>
     <string name="pref_header_about">關於</string>
     <string name="pref_title_version">版本</string>
+
+    <string name="gallery">相簿</string>
+    <string name="flip_camera">翻轉鏡頭</string>
+    <string name="flash_on">閃光燈：開</string>
+    <string name="flash_off">閃光燈：關</string>
+    <string name="tap_to_focus">點擊對焦</string>
+    <string name="pref_title_save_grid">儲存網格線狀態</string>
+    <string name="pref_summary_save_grid">啟動應用時自動顯示網格線</string>
+
+    <!-- New strings for v2 -->
+    <string name="nav_map">地圖</string>
+    <string name="nav_camera">相機</string>
+    <string name="nav_settings">設定</string>
+    <string name="search_bangumi">搜尋 Bangumi ID</string>
+    <string name="check_in">打卡</string>
+    <string name="generate_comparison">生成對比圖</string>
+    <string name="navigate_to">導航</string>
+    <string name="shoot_with_image">用這張圖拍攝</string>
+    <string name="data_source_anitabi">資料來源：Anitabi</string>
+    <string name="offline_cache">離線快取</string>
+    <string name="clear_all_cache">清除所有快取</string>
+    <string name="no_cached_data">暫無快取資料</string>
 </resources>

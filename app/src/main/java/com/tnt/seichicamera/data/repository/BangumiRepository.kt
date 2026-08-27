@@ -51,7 +51,7 @@ open class BangumiRepository @Inject constructor(
         }
     }
 
-    suspend fun cacheOffline(subjectId: Int): Result<Unit> {
+    open suspend fun cacheOffline(subjectId: Int): Result<Unit> {
         return try {
             val response = api.getBangumiPoints(subjectId)
             bangumiDao.insert(response.toBangumiEntity())
@@ -63,15 +63,15 @@ open class BangumiRepository @Inject constructor(
         }
     }
 
-    suspend fun getCachedBangumis(): List<Bangumi> =
+    open suspend fun getCachedBangumis(): List<Bangumi> =
         bangumiDao.getAllCached().map { it.toDomain() }
 
-    suspend fun clearCache(subjectId: Int) {
+    open suspend fun clearCache(subjectId: Int) {
         bangumiDao.deleteById(subjectId)
         // Points deleted by CASCADE
     }
 
-    suspend fun clearAllCache() {
+    open suspend fun clearAllCache() {
         bangumiDao.deleteAll()
     }
 }

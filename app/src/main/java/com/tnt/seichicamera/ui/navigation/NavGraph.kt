@@ -14,6 +14,7 @@ import androidx.navigation.navArgument
 
 import com.tnt.seichicamera.ui.camera.CameraScreen
 import com.tnt.seichicamera.ui.map.MapScreen
+import com.tnt.seichicamera.ui.settings.SettingsScreen
 
 @Composable
 fun NavGraph(
@@ -46,10 +47,7 @@ fun NavGraph(
         }
 
         composable(Screen.Settings.route) {
-            // Placeholder — will be replaced in Task 10
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("⚙️ Settings Screen")
-            }
+            SettingsScreen(navController = navController)
         }
     }
 }
