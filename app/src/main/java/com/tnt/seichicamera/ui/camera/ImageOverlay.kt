@@ -56,10 +56,12 @@ fun ImageOverlay(
         )
     }
 
+    val imageModel: Any? = state.imageUri ?: state.currentImageUrl
+    val hasImage = imageModel != null
+
     Box(modifier = modifier.fillMaxSize()) {
         // Overlay image
-        val imageModel: Any? = state.imageUri ?: state.currentImageUrl
-        if (imageModel != null) {
+        if (hasImage) {
             AsyncImage(
                 model = imageModel,
                 contentDescription = "Overlay reference image",
@@ -81,60 +83,66 @@ fun ImageOverlay(
             )
         }
 
-        // Bottom controls
-        Column(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .padding(bottom = 120.dp, start = 16.dp, end = 16.dp)
-        ) {
-            // Multi-image navigation (only if multiple images)
-            if (state.imageUrls.size > 1) {
+        // Bottom controls (visible when no image is selected, or when editing an existing image)
+        if (!hasImage || state.isEditing) {
+            Column(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .padding(bottom = 120.dp, start = 16.dp, end = 16.dp)
+            ) {
+                if (hasImage) {
+                    // Multi-image navigation (only if multiple images)
+                    if (state.imageUrls.size > 1) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            IconButton(onClick = onPrevImage) {
+                                Icon(Icons.AutoMirrored.Filled.ArrowBack, "Previous", tint = Color.White)
+                            }
+                            Text(
+                                "${state.currentImageIndex + 1} / ${state.imageUrls.size}",
+                                color = Color.White,
+                                modifier = Modifier.weight(1f),
+                            )
+                            IconButton(onClick = onNextImage) {
+                                Icon(Icons.AutoMirrored.Filled.ArrowForward, "Next", tint = Color.White)
+                            }
+                        }
+                    }
+
+                    // Transparency slider
+                    Slider(
+                        value = state.alpha,
+                        onValueChange = onAlphaChange,
+                        valueRange = 0f..1f,
+                        colors = SliderDefaults.colors(
+                            thumbColor = Color.White,
+                            activeTrackColor = Color.White
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    Spacer(Modifier.height(4.dp))
+                }
+
+                // Action buttons
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconButton(onClick = onPrevImage) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Previous", tint = Color.White)
+                    IconButton(onClick = onPickImage) {
+                        Icon(Icons.Default.Image, "Load image", tint = Color.White)
                     }
-                    Text(
-                        "${state.currentImageIndex + 1} / ${state.imageUrls.size}",
-                        color = Color.White,
-                        modifier = Modifier.weight(1f),
-                    )
-                    IconButton(onClick = onNextImage) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowForward, "Next", tint = Color.White)
+                    if (hasImage) {
+                        IconButton(onClick = onMirror) {
+                            Icon(Icons.Default.Flip, "Mirror", tint = Color.White)
+                        }
+                        IconButton(onClick = onReset) {
+                            Icon(Icons.Default.RestartAlt, "Reset", tint = Color.White)
+                        }
                     }
-                }
-            }
-
-            // Transparency slider
-            Slider(
-                value = state.alpha,
-                onValueChange = onAlphaChange,
-                valueRange = 0f..1f,
-                colors = SliderDefaults.colors(
-                    thumbColor = Color.White,
-                    activeTrackColor = Color.White
-                ),
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(Modifier.height(4.dp))
-
-            // Action buttons
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = onPickImage) {
-                    Icon(Icons.Default.Image, "Load image", tint = Color.White)
-                }
-                IconButton(onClick = onMirror) {
-                    Icon(Icons.Default.Flip, "Mirror", tint = Color.White)
-                }
-                IconButton(onClick = onReset) {
-                    Icon(Icons.Default.RestartAlt, "Reset", tint = Color.White)
                 }
             }
         }

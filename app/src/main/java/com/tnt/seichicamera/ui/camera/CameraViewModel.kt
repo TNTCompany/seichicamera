@@ -75,7 +75,7 @@ class CameraViewModel @Inject constructor() : ViewModel() {
 
     fun setOverlayImage(uri: Uri) {
         _overlayState.update {
-            it.copy(imageUri = uri, isEditing = false)
+            it.copy(imageUri = uri, imageUrls = emptyList(), currentImageIndex = 0, isEditing = false)
         }
     }
 
