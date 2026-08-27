@@ -53,4 +53,9 @@
     <string name="close">关闭</string>
     <string name="capture">拍摄</string>
     <string name="share_comparison">分享对比图</string>
+    <string name="error_enter_bangumi_id">请输入有效的 Bangumi 作品 ID (数字)</string>
+    <string name="error_unknown">未知错误</string>
+    <string name="error_cache_failed">缓存失败：%1$s</string>
+    <string name="unknown_point">未知点位</string>
+    <string name="data_source_view_source">数据来源：Anitabi (查看源站)</string>
 </resources>

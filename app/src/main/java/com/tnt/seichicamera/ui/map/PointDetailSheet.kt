@@ -54,7 +54,7 @@ fun PointDetailSheet(
         // Title row
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                text = point.name ?: "Unknown Point",
+                text = point.name ?: stringResource(R.string.unknown_point),
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.weight(1f)
             )
@@ -128,7 +128,11 @@ fun PointDetailSheet(
         val context = LocalContext.current
         val targetUrl = point.originUrl?.takeIf { it.isNotBlank() } ?: "https://anitabi.cn"
         Text(
-            text = if (!point.originUrl.isNullOrBlank()) "Data: Anitabi (View Source)" else "Data: Anitabi",
+            text = if (!point.originUrl.isNullOrBlank()) {
+                stringResource(R.string.data_source_view_source)
+            } else {
+                stringResource(R.string.data_source_anitabi)
+            },
             style = MaterialTheme.typography.bodySmall.copy(
                 textDecoration = TextDecoration.Underline
             ),

@@ -53,4 +53,9 @@
     <string name="close">閉じる</string>
     <string name="capture">撮影</string>
     <string name="share_comparison">比較画像を共有</string>
+    <string name="error_enter_bangumi_id">有効な Bangumi 作品 ID (数字) を入力してください</string>
+    <string name="error_unknown">不明なエラー</string>
+    <string name="error_cache_failed">キャッシュ失敗：%1$s</string>
+    <string name="unknown_point">不明なスポット</string>
+    <string name="data_source_view_source">データ元：Anitabi (元サイトを開く)</string>
 </resources>

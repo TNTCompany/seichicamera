@@ -264,9 +264,7 @@ class CameraViewModelTest {
         viewModel.setPointId("point_456")
         viewModel.onPhotoCaptured(dummyUri)
 
-        // Pass a dummy Context or null-safe context if not used directly
-        val dummyContext = android.content.ContextWrapper(null)
-        viewModel.checkIn(dummyContext)
+        viewModel.checkIn()
         advanceUntilIdle()
 
         assertEquals("point_456", fakeCheckInRepository.lastCheckedInPointId)
@@ -279,8 +277,7 @@ class CameraViewModelTest {
         viewModel.setPointId("")
         viewModel.onPhotoCaptured(dummyUri)
 
-        val dummyContext = android.content.ContextWrapper(null)
-        viewModel.checkIn(dummyContext)
+        viewModel.checkIn()
         advanceUntilIdle()
 
         assertNull(fakeCheckInRepository.lastCheckedInPointId)
@@ -291,8 +288,7 @@ class CameraViewModelTest {
         viewModel.setPointId("point_789")
         viewModel.clearCapturedPhoto()
 
-        val dummyContext = android.content.ContextWrapper(null)
-        viewModel.checkIn(dummyContext)
+        viewModel.checkIn()
         advanceUntilIdle()
 
         assertNull(fakeCheckInRepository.lastCheckedInPointId)

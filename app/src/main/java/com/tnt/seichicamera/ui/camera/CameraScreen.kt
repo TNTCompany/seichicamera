@@ -1,6 +1,7 @@
 package com.tnt.seichicamera.ui.camera
 
 import android.content.ContentValues
+import android.content.Intent
 import android.os.Build
 import android.provider.MediaStore
 import android.util.Log
@@ -105,21 +106,30 @@ fun CameraScreen(
     var imageCapture by remember { mutableStateOf<ImageCapture?>(null) }
     var cameraProvider by remember { mutableStateOf<ProcessCameraProvider?>(null) }
 
+    val cameraAspectRatio = when (uiState.aspectRatio) {
+        AspectRatioOption.RATIO_16_9, AspectRatioOption.RATIO_CINEMATIC -> androidx.camera.core.AspectRatio.RATIO_16_9
+        else -> androidx.camera.core.AspectRatio.RATIO_4_3
+    }
+
     // Camera setup
     val previewView = remember { PreviewView(context) }
 
-    DisposableEffect(uiState.lensFacing) {
+    DisposableEffect(uiState.lensFacing, cameraAspectRatio) {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
         cameraProviderFuture.addListener({
             val provider = cameraProviderFuture.get()
             cameraProvider = provider
             provider.unbindAll()
 
-            val preview = Preview.Builder().build().also {
-                it.surfaceProvider = previewView.surfaceProvider
-            }
+            val preview = Preview.Builder()
+                .setTargetAspectRatio(cameraAspectRatio)
+                .build()
+                .also {
+                    it.surfaceProvider = previewView.surfaceProvider
+                }
 
             val capture = ImageCapture.Builder()
+                .setTargetAspectRatio(cameraAspectRatio)
                 .setFlashMode(uiState.flashMode)
                 .build()
             imageCapture = capture
@@ -143,6 +153,24 @@ fun CameraScreen(
     DisposableEffect(uiState.flashMode) {
         imageCapture?.flashMode = uiState.flashMode
         onDispose { }
+    }
+
+    // Handle comparison sharing event safely in UI
+    val shareUri by viewModel.shareEvent.collectAsStateWithLifecycle()
+    LaunchedEffect(shareUri) {
+        val uri = shareUri ?: return@LaunchedEffect
+        try {
+            val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                type = "image/jpeg"
+                putExtra(Intent.EXTRA_STREAM, uri)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+            context.startActivity(Intent.createChooser(shareIntent, context.getString(R.string.share_comparison)))
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to share comparison", e)
+        } finally {
+            viewModel.onShareEventConsumed()
+        }
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -289,7 +317,7 @@ fun CameraScreen(
                     photoUri = uiState.capturedPhotoUri!!,
                     pointId = viewModel.pointId.ifBlank { null },
                     onCheckIn = {
-                        viewModel.checkIn(context)
+                        viewModel.checkIn()
                         Toast.makeText(context, context.getString(R.string.checked_in), Toast.LENGTH_SHORT).show()
                         viewModel.clearCapturedPhoto()
                     },

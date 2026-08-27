@@ -22,54 +22,79 @@ import java.util.Locale
 
 object ComparisonGenerator {
 
+    private const val MAX_SINGLE_DIMENSION = 1280
+
     suspend fun generate(
         context: Context,
         referenceImageSource: Any, // Uri or URL String
         photoUri: Uri
     ): Uri? = withContext(Dispatchers.IO) {
+        var refBitmap: Bitmap? = null
+        var photoBitmap: Bitmap? = null
+        var refScaled: Bitmap? = null
+        var photoScaled: Bitmap? = null
+        var comparison: Bitmap? = null
+
         try {
             val imageLoader = ImageLoader(context)
 
-            // Load reference image
-            val refRequest = ImageRequest.Builder(context).data(referenceImageSource).build()
+            // Load reference image (bounded size)
+            val refRequest = ImageRequest.Builder(context)
+                .data(referenceImageSource)
+                .size(MAX_SINGLE_DIMENSION, MAX_SINGLE_DIMENSION)
+                .build()
             val refResult = imageLoader.execute(refRequest)
-            val refBitmap = (refResult as? SuccessResult)?.image?.toBitmap() ?: return@withContext null
+            refBitmap = (refResult as? SuccessResult)?.image?.toBitmap() ?: return@withContext null
 
-            // Load photo
-            val photoRequest = ImageRequest.Builder(context).data(photoUri).build()
+            // Load photo (bounded size)
+            val photoRequest = ImageRequest.Builder(context)
+                .data(photoUri)
+                .size(MAX_SINGLE_DIMENSION, MAX_SINGLE_DIMENSION)
+                .build()
             val photoResult = imageLoader.execute(photoRequest)
-            val photoBitmap = (photoResult as? SuccessResult)?.image?.toBitmap() ?: return@withContext null
+            photoBitmap = (photoResult as? SuccessResult)?.image?.toBitmap() ?: return@withContext null
 
-            // Create side-by-side comparison
-            val width = maxOf(refBitmap.width, photoBitmap.width)
-            val height = maxOf(refBitmap.height, photoBitmap.height)
-            val watermarkHeight = 48
-            val totalWidth = width * 2
-            val totalHeight = height + watermarkHeight
+            // Create side-by-side comparison with normalized dimensions
+            var targetWidth = maxOf(refBitmap.width, photoBitmap.width)
+            var targetHeight = maxOf(refBitmap.height, photoBitmap.height)
 
-            val comparison = Bitmap.createBitmap(totalWidth, totalHeight, Bitmap.Config.ARGB_8888)
+            // Limit target dimensions to prevent OOM
+            if (targetWidth > MAX_SINGLE_DIMENSION || targetHeight > MAX_SINGLE_DIMENSION) {
+                val scale = minOf(
+                    MAX_SINGLE_DIMENSION.toFloat() / targetWidth,
+                    MAX_SINGLE_DIMENSION.toFloat() / targetHeight
+                )
+                targetWidth = (targetWidth * scale).toInt().coerceAtLeast(1)
+                targetHeight = (targetHeight * scale).toInt().coerceAtLeast(1)
+            }
+
+            val watermarkHeight = (targetHeight * 0.05f).toInt().coerceIn(36, 72)
+            val totalWidth = targetWidth * 2
+            val totalHeight = targetHeight + watermarkHeight
+
+            comparison = Bitmap.createBitmap(totalWidth, totalHeight, Bitmap.Config.ARGB_8888)
             val canvas = Canvas(comparison)
             canvas.drawColor(Color.BLACK)
 
             // Draw reference image (left)
-            val refScaled = Bitmap.createScaledBitmap(refBitmap, width, height, true)
+            refScaled = Bitmap.createScaledBitmap(refBitmap, targetWidth, targetHeight, true)
             canvas.drawBitmap(refScaled, 0f, 0f, null)
 
             // Draw photo (right)
-            val photoScaled = Bitmap.createScaledBitmap(photoBitmap, width, height, true)
-            canvas.drawBitmap(photoScaled, width.toFloat(), 0f, null)
+            photoScaled = Bitmap.createScaledBitmap(photoBitmap, targetWidth, targetHeight, true)
+            canvas.drawBitmap(photoScaled, targetWidth.toFloat(), 0f, null)
 
             // Draw watermark
             val paint = Paint().apply {
                 color = Color.WHITE
-                textSize = 24f
+                textSize = (watermarkHeight * 0.45f).coerceIn(16f, 32f)
                 typeface = Typeface.DEFAULT
                 isAntiAlias = true
             }
             canvas.drawText(
                 "Data: Anitabi · Photo: SeichiCamera",
                 16f,
-                height + watermarkHeight - 12f,
+                targetHeight + watermarkHeight - (watermarkHeight * 0.25f),
                 paint
             )
 
@@ -92,14 +117,17 @@ object ComparisonGenerator {
                 comparison.compress(Bitmap.CompressFormat.JPEG, 90, stream)
             }
 
-            // Cleanup
-            refScaled.recycle()
-            photoScaled.recycle()
-            comparison.recycle()
-
             uri
         } catch (e: Exception) {
             null
+        } finally {
+            try {
+                if (refScaled != null && refScaled !== refBitmap) refScaled.recycle()
+                if (photoScaled != null && photoScaled !== photoBitmap) photoScaled.recycle()
+                refBitmap?.recycle()
+                photoBitmap?.recycle()
+                comparison?.recycle()
+            } catch (_: Exception) {}
         }
     }
 }

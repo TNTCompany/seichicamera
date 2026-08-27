@@ -2,6 +2,7 @@ package com.tnt.seichicamera.ui.map
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.tnt.seichicamera.R
 import com.tnt.seichicamera.data.repository.BangumiRepository
 import com.tnt.seichicamera.data.repository.CheckInRepository
 import com.tnt.seichicamera.domain.model.Bangumi
@@ -22,7 +23,9 @@ data class MapUiState(
     val points: List<SacredPoint> = emptyList(),
     val selectedPoint: SacredPoint? = null,
     val isLoading: Boolean = false,
-    val error: String? = null
+    val error: String? = null,
+    val errorRes: Int? = null,
+    val errorArg: String? = null
 )
 
 @HiltViewModel
@@ -46,7 +49,7 @@ class MapViewModel @Inject constructor(
         val query = _uiState.value.searchQuery.trim()
         if (query.isBlank()) return
 
-        _uiState.update { it.copy(isLoading = true, error = null) }
+        _uiState.update { it.copy(isLoading = true, error = null, errorRes = null, errorArg = null) }
         viewModelScope.launch {
             // Try parsing as Bangumi ID (number)
             val subjectId = query.toIntOrNull()
@@ -65,13 +68,21 @@ class MapViewModel @Inject constructor(
                     },
                     onFailure = { e ->
                         _uiState.update {
-                            it.copy(isLoading = false, error = e.message ?: "Unknown error")
+                            it.copy(
+                                isLoading = false,
+                                error = e.message,
+                                errorRes = if (e.message == null) R.string.error_unknown else null
+                            )
                         }
                     }
                 )
             } else {
                 _uiState.update {
-                    it.copy(isLoading = false, error = "Please enter a Bangumi Subject ID (number)")
+                    it.copy(
+                        isLoading = false,
+                        errorRes = R.string.error_enter_bangumi_id,
+                        error = null
+                    )
                 }
             }
         }
@@ -82,22 +93,29 @@ class MapViewModel @Inject constructor(
     }
 
     fun downloadOfflineCache() {
+        if (_uiState.value.isLoading) return
         val subjectId = _uiState.value.bangumi?.id ?: return
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             val result = bangumiRepository.cacheOffline(subjectId)
             result.fold(
                 onSuccess = {
-                    _uiState.update { it.copy(isLoading = false, error = null) }
+                    _uiState.update { it.copy(isLoading = false, error = null, errorRes = null, errorArg = null) }
                 },
                 onFailure = { e ->
-                    _uiState.update { it.copy(isLoading = false, error = "Cache failed: ${e.message}") }
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            errorRes = R.string.error_cache_failed,
+                            errorArg = e.message ?: "Unknown"
+                        )
+                    }
                 }
             )
         }
     }
 
     fun clearError() {
-        _uiState.update { it.copy(error = null) }
+        _uiState.update { it.copy(error = null, errorRes = null, errorArg = null) }
     }
 }

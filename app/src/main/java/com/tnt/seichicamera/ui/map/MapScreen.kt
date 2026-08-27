@@ -96,8 +96,19 @@ fun MapScreen(
     var lastRenderedCheckedInIds by remember { mutableStateOf<List<String>?>(null) }
 
     // Show errors
-    LaunchedEffect(uiState.error) {
-        uiState.error?.let {
+    LaunchedEffect(uiState.error, uiState.errorRes) {
+        val message = when {
+            uiState.errorRes != null -> {
+                if (uiState.errorArg != null) {
+                    context.getString(uiState.errorRes!!, uiState.errorArg)
+                } else {
+                    context.getString(uiState.errorRes!!)
+                }
+            }
+            uiState.error != null -> uiState.error
+            else -> null
+        }
+        message?.let {
             snackbarHostState.showSnackbar(it)
             viewModel.clearError()
         }

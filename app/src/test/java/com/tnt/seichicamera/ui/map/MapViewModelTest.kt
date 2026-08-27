@@ -121,7 +121,7 @@ class MapViewModelTest {
         advanceUntilIdle()
 
         assertFalse(viewModel.uiState.value.isLoading)
-        assertEquals("Please enter a Bangumi Subject ID (number)", viewModel.uiState.value.error)
+        assertEquals(com.tnt.seichicamera.R.string.error_enter_bangumi_id, viewModel.uiState.value.errorRes)
         assertNull(viewModel.uiState.value.bangumi)
     }
 
@@ -136,6 +136,7 @@ class MapViewModelTest {
         val state = viewModel.uiState.value
         assertFalse(state.isLoading)
         assertNull(state.error)
+        assertNull(state.errorRes)
         assertEquals(testBangumi, state.bangumi)
         assertEquals(testPoints, state.points)
         assertNull(state.selectedPoint)
@@ -170,10 +171,11 @@ class MapViewModelTest {
         viewModel.onSearchQueryChanged("invalid")
         viewModel.searchBangumi()
         advanceUntilIdle()
-        assertEquals("Please enter a Bangumi Subject ID (number)", viewModel.uiState.value.error)
+        assertEquals(com.tnt.seichicamera.R.string.error_enter_bangumi_id, viewModel.uiState.value.errorRes)
 
         viewModel.clearError()
         assertNull(viewModel.uiState.value.error)
+        assertNull(viewModel.uiState.value.errorRes)
     }
 
     @Test
@@ -211,6 +213,7 @@ class MapViewModelTest {
         val state = viewModel.uiState.value
         assertFalse(state.isLoading)
         assertNull(state.error)
+        assertNull(state.errorRes)
         assertEquals(253, fakeBangumiRepository.lastCachedSubjectId)
     }
 
@@ -227,7 +230,8 @@ class MapViewModelTest {
 
         val state = viewModel.uiState.value
         assertFalse(state.isLoading)
-        assertEquals("Cache failed: Network error", state.error)
+        assertEquals(com.tnt.seichicamera.R.string.error_cache_failed, state.errorRes)
+        assertEquals("Network error", state.errorArg)
         assertEquals(253, fakeBangumiRepository.lastCachedSubjectId)
     }
 

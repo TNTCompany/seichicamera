@@ -1,19 +1,12 @@
 package com.tnt.seichicamera.data.local.entity
 
 import androidx.room.Entity
-import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.tnt.seichicamera.domain.model.CheckIn
 
 @Entity(
     tableName = "check_in",
-    foreignKeys = [ForeignKey(
-        entity = SacredPointEntity::class,
-        parentColumns = ["id"],
-        childColumns = ["pointId"],
-        onDelete = ForeignKey.CASCADE
-    )],
     indices = [Index("pointId")]
 )
 data class CheckInEntity(

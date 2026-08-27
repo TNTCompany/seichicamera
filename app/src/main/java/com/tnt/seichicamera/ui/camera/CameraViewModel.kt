@@ -1,7 +1,6 @@
 package com.tnt.seichicamera.ui.camera
 
 import android.content.Context
-import android.content.Intent
 import android.net.Uri
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
@@ -144,7 +143,10 @@ class CameraViewModel @Inject constructor(
     private val _comparisonUri = MutableStateFlow<Uri?>(null)
     val comparisonUri: StateFlow<Uri?> = _comparisonUri.asStateFlow()
 
-    fun checkIn(context: Context) {
+    private val _shareEvent = MutableStateFlow<Uri?>(null)
+    val shareEvent: StateFlow<Uri?> = _shareEvent.asStateFlow()
+
+    fun checkIn() {
         val photoUri = _uiState.value.capturedPhotoUri ?: return
         val pid = _pointId.ifBlank { return }
         viewModelScope.launch {
@@ -162,19 +164,18 @@ class CameraViewModel @Inject constructor(
             ?: _overlayState.value.currentImageUrl
             ?: return
 
+        val appContext = context.applicationContext
         viewModelScope.launch {
-            val uri = ComparisonGenerator.generate(context, refSource, photoUri)
+            val uri = ComparisonGenerator.generate(appContext, refSource, photoUri)
             _comparisonUri.value = uri
             if (uri != null) {
-                // Share intent
-                val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                    type = "image/jpeg"
-                    putExtra(Intent.EXTRA_STREAM, uri)
-                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                }
-                context.startActivity(Intent.createChooser(shareIntent, context.getString(R.string.share_comparison)))
+                _shareEvent.value = uri
             }
         }
+    }
+
+    fun onShareEventConsumed() {
+        _shareEvent.value = null
     }
 }
 

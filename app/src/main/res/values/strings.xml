@@ -55,4 +55,9 @@
     <string name="close">Close</string>
     <string name="capture">Capture</string>
     <string name="share_comparison">Share comparison</string>
+    <string name="error_enter_bangumi_id">Please enter a Bangumi Subject ID (number)</string>
+    <string name="error_unknown">Unknown error</string>
+    <string name="error_cache_failed">Cache failed: %1$s</string>
+    <string name="unknown_point">Unknown Point</string>
+    <string name="data_source_view_source">Data: Anitabi (View Source)</string>
 </resources>
