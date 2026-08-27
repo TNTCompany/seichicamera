@@ -7,10 +7,10 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class CheckInRepository @Inject constructor(
+open class CheckInRepository @Inject constructor(
     private val checkInDao: CheckInDao
 ) {
-    suspend fun checkIn(pointId: String, photoUri: String, comparisonUri: String? = null): Long {
+    open suspend fun checkIn(pointId: String, photoUri: String, comparisonUri: String? = null): Long {
         return checkInDao.insert(
             CheckInEntity(
                 pointId = pointId,
@@ -21,9 +21,9 @@ class CheckInRepository @Inject constructor(
         )
     }
 
-    fun getCheckedInPointIds(): Flow<List<String>> =
+    open fun getCheckedInPointIds(): Flow<List<String>> =
         checkInDao.getAllCheckedInPointIds()
 
-    suspend fun isCheckedIn(pointId: String): Boolean =
+    open suspend fun isCheckedIn(pointId: String): Boolean =
         checkInDao.getByPointId(pointId) != null
 }

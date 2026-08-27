@@ -22,9 +22,12 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -33,6 +36,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.tnt.seichicamera.domain.model.SacredPoint
@@ -51,7 +57,38 @@ fun MapScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val checkedInIds by viewModel.checkedInPointIds.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
     val snackbarHostState = remember { SnackbarHostState() }
+
+    val mapView = remember {
+        MapView(context).apply {
+            setTileSource(TileSourceFactory.MAPNIK)
+            setMultiTouchControls(true)
+            controller.setZoom(5.0)
+            controller.setCenter(GeoPoint(36.0, 138.0)) // Japan center
+        }
+    }
+
+    // Bind MapView lifecycle
+    DisposableEffect(lifecycleOwner, mapView) {
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_RESUME -> mapView.onResume()
+                Lifecycle.Event.ON_PAUSE -> mapView.onPause()
+                else -> {}
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+            mapView.onDetach()
+        }
+    }
+
+    // Track state to avoid resetting view/markers unnecessarily on recomposition
+    var lastCenteredBangumiId by remember { mutableStateOf<Int?>(null) }
+    var lastRenderedPoints by remember { mutableStateOf<List<SacredPoint>?>(null) }
+    var lastRenderedCheckedInIds by remember { mutableStateOf<List<String>?>(null) }
 
     // Show errors
     LaunchedEffect(uiState.error) {
@@ -95,47 +132,48 @@ fun MapScreen(
 
             // Map
             AndroidView(
-                factory = { ctx ->
-                    MapView(ctx).apply {
-                        setTileSource(TileSourceFactory.MAPNIK)
-                        setMultiTouchControls(true)
-                        controller.setZoom(5.0)
-                        controller.setCenter(GeoPoint(36.0, 138.0)) // Japan center
-                    }
-                },
-                update = { mapView ->
-                    mapView.overlays.clear()
+                factory = { mapView },
+                update = { view ->
+                    val pointsChanged = lastRenderedPoints != uiState.points ||
+                            lastRenderedCheckedInIds != checkedInIds
 
-                    uiState.points.forEach { point ->
-                        val marker = Marker(mapView).apply {
-                            position = GeoPoint(point.latitude, point.longitude)
-                            title = point.name ?: "Point"
-                            snippet = point.ep ?: ""
-                            setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                    if (pointsChanged) {
+                        lastRenderedPoints = uiState.points
+                        lastRenderedCheckedInIds = checkedInIds
+                        view.overlays.clear()
 
-                            // Green if checked in, default otherwise
-                            if (point.id in checkedInIds) {
-                                // Use default marker (tinted via icon in future)
+                        uiState.points.forEach { point ->
+                            val marker = Marker(view).apply {
+                                position = GeoPoint(point.latitude, point.longitude)
+                                title = point.name ?: "Point"
+                                snippet = point.ep ?: ""
+                                setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+
+                                // Green if checked in, default otherwise
+                                if (point.id in checkedInIds) {
+                                    // Use default marker (tinted via icon in future)
+                                }
+
+                                setOnMarkerClickListener { _, _ ->
+                                    viewModel.selectPoint(point)
+                                    true
+                                }
                             }
-
-                            setOnMarkerClickListener { _, _ ->
-                                viewModel.selectPoint(point)
-                                true
-                            }
+                            view.overlays.add(marker)
                         }
-                        mapView.overlays.add(marker)
+                        view.invalidate()
                     }
 
-                    // Zoom to fit points
-                    if (uiState.points.isNotEmpty()) {
+                    // Zoom to fit points ONLY when loaded bangumi changes
+                    val currentBangumiId = uiState.bangumi?.id
+                    if (currentBangumiId != null && currentBangumiId != lastCenteredBangumiId && uiState.points.isNotEmpty()) {
+                        lastCenteredBangumiId = currentBangumiId
                         val avgLat = uiState.points.map { it.latitude }.average()
                         val avgLng = uiState.points.map { it.longitude }.average()
                         val zoom = uiState.bangumi?.zoom?.toDouble() ?: 12.0
-                        mapView.controller.setCenter(GeoPoint(avgLat, avgLng))
-                        mapView.controller.setZoom(zoom)
+                        view.controller.setCenter(GeoPoint(avgLat, avgLng))
+                        view.controller.setZoom(zoom)
                     }
-
-                    mapView.invalidate()
                 },
                 modifier = Modifier.fillMaxSize()
             )

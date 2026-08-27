@@ -1,5 +1,7 @@
 package com.tnt.seichicamera.ui.map
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -28,6 +30,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.tnt.seichicamera.domain.model.SacredPoint
@@ -115,10 +119,22 @@ fun PointDetailSheet(
 
         // Attribution
         Spacer(Modifier.height(8.dp))
+        val context = LocalContext.current
+        val targetUrl = point.originUrl?.takeIf { it.isNotBlank() } ?: "https://anitabi.cn"
         Text(
-            text = "Data: Anitabi",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            text = if (!point.originUrl.isNullOrBlank()) "Data: Anitabi (View Source)" else "Data: Anitabi",
+            style = MaterialTheme.typography.bodySmall.copy(
+                textDecoration = TextDecoration.Underline
+            ),
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.clickable {
+                try {
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(targetUrl))
+                    context.startActivity(intent)
+                } catch (_: Exception) {
+                    // Ignore if no browser application is available
+                }
+            }
         )
     }
 }

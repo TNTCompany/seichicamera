@@ -9,12 +9,12 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class BangumiRepository @Inject constructor(
+open class BangumiRepository @Inject constructor(
     private val api: AnitabiApi,
     private val bangumiDao: BangumiDao,
     private val pointDao: SacredPointDao
 ) {
-    suspend fun getBangumiPoints(subjectId: Int): Result<Pair<Bangumi, List<SacredPoint>>> {
+    open suspend fun getBangumiPoints(subjectId: Int): Result<Pair<Bangumi, List<SacredPoint>>> {
         // 1. Try local cache first
         val cachedBangumi = bangumiDao.getById(subjectId)
         if (cachedBangumi != null) {
