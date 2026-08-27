@@ -4,6 +4,12 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
+import androidx.compose.ui.Modifier
+import androidx.navigation.compose.rememberNavController
+import com.tnt.seichicamera.ui.navigation.BottomNavBar
+import com.tnt.seichicamera.ui.navigation.NavGraph
 import com.tnt.seichicamera.ui.theme.SeichiCameraTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -14,8 +20,15 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             SeichiCameraTheme {
-                // Navigation will be added in Task 5
-                androidx.compose.material3.Text("SeichiCamera v2")
+                val navController = rememberNavController()
+                Scaffold(
+                    bottomBar = { BottomNavBar(navController) }
+                ) { innerPadding ->
+                    NavGraph(
+                        navController = navController,
+                        modifier = Modifier.padding(innerPadding)
+                    )
+                }
             }
         }
     }
