@@ -70,6 +70,13 @@ class CameraViewModel @Inject constructor() : ViewModel() {
         _uiState.update { it.copy(hasFlash = hasFlash) }
     }
 
+    private var _pointId: String = ""
+    val pointId: String get() = _pointId
+
+    fun setPointId(id: String) {
+        _pointId = id
+    }
+
     private val _overlayState = MutableStateFlow(OverlayState())
     val overlayState: StateFlow<OverlayState> = _overlayState.asStateFlow()
 

@@ -32,9 +32,11 @@ import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material.icons.filled.GridOn
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -61,6 +63,7 @@ import java.util.Locale
 
 private const val TAG = "CameraScreen"
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CameraScreen(
     navController: NavController,
@@ -87,6 +90,13 @@ fun CameraScreen(
             if (urls.isNotEmpty()) {
                 viewModel.setOverlayImageUrls(urls)
             }
+        }
+    }
+
+    // Initialize pointId from nav args
+    LaunchedEffect(pointId) {
+        if (pointId.isNotBlank()) {
+            viewModel.setPointId(pointId)
         }
     }
 
@@ -255,6 +265,27 @@ fun CameraScreen(
                 .size(72.dp)
         ) {
             Icon(Icons.Default.CameraAlt, contentDescription = "Capture", modifier = Modifier.size(36.dp))
+        }
+
+        // Post-capture bottom sheet
+        if (uiState.capturedPhotoUri != null) {
+            ModalBottomSheet(
+                onDismissRequest = { viewModel.clearCapturedPhoto() }
+            ) {
+                PostCaptureSheet(
+                    photoUri = uiState.capturedPhotoUri!!,
+                    pointId = viewModel.pointId.ifBlank { null },
+                    onCheckIn = {
+                        // Will be implemented in Task 11
+                        viewModel.clearCapturedPhoto()
+                    },
+                    onGenerateComparison = {
+                        // Will be implemented in Task 11
+                        viewModel.clearCapturedPhoto()
+                    },
+                    onDismiss = { viewModel.clearCapturedPhoto() }
+                )
+            }
         }
     }
 }
