@@ -28,9 +28,11 @@ open class BangumiRepository @Inject constructor(
 
         // 2. Fetch from API
         return try {
-            val response = api.getBangumiPoints(subjectId)
-            val bangumiEntity = response.toBangumiEntity()
-            val pointEntities = response.toPointEntities()
+            val liteResponse = api.getBangumiLite(subjectId)
+            val pointsResponse = api.getBangumiPoints(subjectId)
+            
+            val bangumiEntity = liteResponse.toBangumiEntity()
+            val pointEntities = pointsResponse.map { it.toEntity(subjectId) }
 
             // 3. Save to local
             bangumiDao.insert(bangumiEntity)
@@ -53,9 +55,11 @@ open class BangumiRepository @Inject constructor(
 
     open suspend fun cacheOffline(subjectId: Int): Result<Unit> {
         return try {
-            val response = api.getBangumiPoints(subjectId)
-            bangumiDao.insert(response.toBangumiEntity())
-            pointDao.insertAll(response.toPointEntities())
+            val liteResponse = api.getBangumiLite(subjectId)
+            val pointsResponse = api.getBangumiPoints(subjectId)
+            
+            bangumiDao.insert(liteResponse.toBangumiEntity())
+            pointDao.insertAll(pointsResponse.map { it.toEntity(subjectId) })
             bangumiDao.updateCachedStatus(subjectId, true)
             Result.success(Unit)
         } catch (e: Exception) {

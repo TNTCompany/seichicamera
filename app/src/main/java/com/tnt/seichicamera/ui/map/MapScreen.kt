@@ -153,9 +153,16 @@ fun MapScreen(
                             snippet = point.ep ?: ""
                             setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
 
-                            // Green if checked in, default otherwise
+                            val iconDrawable = androidx.core.content.ContextCompat.getDrawable(
+                                context,
+                                R.drawable.ic_map_pin
+                            )?.mutate()
+                            
                             if (point.id in checkedInIds) {
-                                // Use default marker (tinted via icon in future)
+                                iconDrawable?.setTint(android.graphics.Color.GREEN)
+                            }
+                            if (iconDrawable != null) {
+                                setIcon(iconDrawable)
                             }
 
                             setOnMarkerClickListener { _, _ ->

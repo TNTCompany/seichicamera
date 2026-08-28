@@ -21,21 +21,23 @@ class BangumiRepositoryTest {
     private lateinit var fakePointDao: FakePointDao
     private lateinit var repository: BangumiRepository
 
-    private val testResponse = BangumiResponse(
+    private val testLiteResponse = BangumiResponse(
         id = 100,
         titleCn = "摇曳露营",
         title = "Laid-Back Camp",
         city = "Yamanashi",
         cover = "cover100",
-        zoom = 12f,
-        litePoints = listOf(
-            LitePoint(
-                name = "Kouan Camping Ground",
-                geo = listOf(138.57, 35.47),
-                image = "img1.jpg",
-                origin = "https://anitabi.cn/map?point=pt_1",
-                ep = "1"
-            )
+        zoom = 12f
+    )
+    
+    private val testPointsResponse = listOf(
+        com.tnt.seichicamera.data.remote.dto.PointDetailItem(
+            id = "pt_1",
+            name = "Kouan Camping Ground",
+            geo = listOf(35.47, 138.57),
+            image = "img1.jpg",
+            originURL = "https://anitabi.cn/map?point=pt_1",
+            ep = kotlinx.serialization.json.JsonPrimitive("1")
         )
     )
 
@@ -67,7 +69,8 @@ class BangumiRepositoryTest {
 
     @Test
     fun `getBangumiPoints fetches from network and caches when cache is empty`() = runTest {
-        fakeApi.responseToReturn = testResponse
+        fakeApi.liteResponseToReturn = testLiteResponse
+        fakeApi.pointsResponseToReturn = testPointsResponse
 
         val result = repository.getBangumiPoints(100)
 
@@ -80,7 +83,7 @@ class BangumiRepositoryTest {
 
         // Verify stored in DB
         assertNotNull(fakeBangumiDao.items[100])
-        assertNotNull(fakePointDao.items["100_0"])
+        assertNotNull(fakePointDao.items["pt_1"])
     }
 
     @Test
@@ -109,7 +112,8 @@ class BangumiRepositoryTest {
 
     @Test
     fun `cacheOffline saves data and marks as cached`() = runTest {
-        fakeApi.responseToReturn = testResponse
+        fakeApi.liteResponseToReturn = testLiteResponse
+        fakeApi.pointsResponseToReturn = testPointsResponse
 
         val result = repository.cacheOffline(100)
 
@@ -140,14 +144,20 @@ class BangumiRepositoryTest {
     // --- Fakes ---
 
     private class FakeAnitabiApi : AnitabiApi {
-        var responseToReturn: BangumiResponse? = null
+        var liteResponseToReturn: BangumiResponse? = null
+        var pointsResponseToReturn: List<com.tnt.seichicamera.data.remote.dto.PointDetailItem>? = null
         var shouldThrow = false
         var callCount = 0
 
-        override suspend fun getBangumiPoints(subjectId: Int): BangumiResponse {
+        override suspend fun getBangumiLite(subjectId: Int): BangumiResponse {
             callCount++
             if (shouldThrow) throw RuntimeException("Network timeout")
-            return responseToReturn ?: throw IllegalStateException("No response set")
+            return liteResponseToReturn ?: throw IllegalStateException("No lite response set")
+        }
+
+        override suspend fun getBangumiPoints(subjectId: Int): List<com.tnt.seichicamera.data.remote.dto.PointDetailItem> {
+            if (shouldThrow) throw RuntimeException("Network timeout")
+            return pointsResponseToReturn ?: emptyList()
         }
     }
 

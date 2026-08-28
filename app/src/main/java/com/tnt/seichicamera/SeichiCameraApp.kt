@@ -9,6 +9,7 @@ class SeichiCameraApp : Application() {
     override fun onCreate() {
         super.onCreate()
         // osmdroid configuration
+        Configuration.getInstance().load(this, getSharedPreferences("osmdroid", android.content.Context.MODE_PRIVATE))
         Configuration.getInstance().userAgentValue = packageName
     }
 }

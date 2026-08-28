@@ -300,7 +300,9 @@ class MapViewModelTest {
 
     private class FakeBangumiRepository : BangumiRepository(
         api = object : AnitabiApi {
-            override suspend fun getBangumiPoints(subjectId: Int): BangumiResponse =
+            override suspend fun getBangumiLite(subjectId: Int): BangumiResponse =
+                throw UnsupportedOperationException()
+            override suspend fun getBangumiPoints(subjectId: Int): List<com.tnt.seichicamera.data.remote.dto.PointDetailItem> =
                 throw UnsupportedOperationException()
         },
         bangumiDao = object : BangumiDao {
