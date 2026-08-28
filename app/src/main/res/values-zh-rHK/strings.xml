@@ -31,7 +31,7 @@
     <string name="nav_map">地圖</string>
     <string name="nav_camera">相機</string>
     <string name="nav_settings">設定</string>
-    <string name="search_bangumi">搜尋 Bangumi ID</string>
+    <string name="search_bangumi">搜尋動漫名稱或 Bangumi ID</string>
     <string name="search">搜尋</string>
     <string name="check_in">打卡</string>
     <string name="checked_in">已打卡</string>
@@ -58,4 +58,7 @@
     <string name="error_cache_failed">快取失敗：%1$s</string>
     <string name="unknown_point">未知點位</string>
     <string name="data_source_view_source">資料來源：Anitabi (檢視源站)</string>
+    <string name="search_bangumi_or_name">搜尋動漫名稱或 Bangumi ID</string>
+    <string name="search_no_results">未搵到相關結果</string>
+    <string name="error_search_failed">搜尋失敗：%1$s</string>
 </resources>

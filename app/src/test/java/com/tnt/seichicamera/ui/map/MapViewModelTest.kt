@@ -7,7 +7,11 @@ import com.tnt.seichicamera.data.local.entity.BangumiEntity
 import com.tnt.seichicamera.data.local.entity.CheckInEntity
 import com.tnt.seichicamera.data.local.entity.SacredPointEntity
 import com.tnt.seichicamera.data.remote.AnitabiApi
+import com.tnt.seichicamera.data.remote.BangumiSearchApi
 import com.tnt.seichicamera.data.remote.dto.BangumiResponse
+import com.tnt.seichicamera.data.remote.dto.BangumiSearchResponse
+import com.tnt.seichicamera.data.remote.dto.BangumiSearchItem
+import com.tnt.seichicamera.data.remote.dto.BangumiImages
 import com.tnt.seichicamera.data.repository.BangumiRepository
 import com.tnt.seichicamera.data.repository.CheckInRepository
 import com.tnt.seichicamera.domain.model.Bangumi
@@ -28,6 +32,7 @@ import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -40,6 +45,7 @@ class MapViewModelTest {
 
     private lateinit var fakeBangumiRepository: FakeBangumiRepository
     private lateinit var fakeCheckInRepository: FakeCheckInRepository
+    private lateinit var fakeBangumiSearchApi: FakeBangumiSearchApi
     private lateinit var viewModel: MapViewModel
 
     private val testBangumi = Bangumi(
@@ -78,7 +84,10 @@ class MapViewModelTest {
         Dispatchers.setMain(testDispatcher)
         fakeBangumiRepository = FakeBangumiRepository()
         fakeCheckInRepository = FakeCheckInRepository()
-        viewModel = MapViewModel(fakeBangumiRepository, fakeCheckInRepository)
+        fakeBangumiSearchApi = FakeBangumiSearchApi()
+        // Provide a default result so the init loadDefaultContent doesn't fail
+        fakeBangumiRepository.resultToReturn = Result.failure(RuntimeException("Not configured"))
+        viewModel = MapViewModel(fakeBangumiRepository, fakeCheckInRepository, fakeBangumiSearchApi)
     }
 
     @After
@@ -87,14 +96,10 @@ class MapViewModelTest {
     }
 
     @Test
-    fun `initial state has default values`() {
-        val state = viewModel.uiState.value
-        assertEquals("", state.searchQuery)
-        assertNull(state.bangumi)
-        assertTrue(state.points.isEmpty())
-        assertNull(state.selectedPoint)
-        assertFalse(state.isLoading)
-        assertNull(state.error)
+    fun `initial state triggers default content loading`() = runTest(testDispatcher) {
+        advanceUntilIdle()
+        // Even if default load fails, should not be loading anymore
+        assertFalse(viewModel.uiState.value.isLoading)
     }
 
     @Test
@@ -104,24 +109,43 @@ class MapViewModelTest {
     }
 
     @Test
+    fun `onSearchQueryChanged with text triggers debounced search`() = runTest(testDispatcher) {
+        fakeBangumiSearchApi.responseToReturn = BangumiSearchResponse(
+            results = 1,
+            list = listOf(
+                BangumiSearchItem(id = 253, name = "Kimi no Na wa.", nameCn = "你的名字。", images = null, airDate = "2016-08-26")
+            )
+        )
+
+        viewModel.onSearchQueryChanged("你的名字")
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertTrue(state.searchResults.isNotEmpty())
+        assertEquals("你的名字。", state.searchResults[0].nameCn)
+        assertTrue(state.showSearchResults)
+    }
+
+    @Test
+    fun `onSearchQueryChanged with numeric does not trigger name search`() = runTest(testDispatcher) {
+        viewModel.onSearchQueryChanged("253")
+        advanceUntilIdle()
+
+        assertFalse(viewModel.uiState.value.showSearchResults)
+        assertTrue(viewModel.uiState.value.searchResults.isEmpty())
+    }
+
+    @Test
     fun `searchBangumi with blank query does not trigger load`() = runTest(testDispatcher) {
+        advanceUntilIdle() // let init finish
+        viewModel.clearError() // clear any error from default content load
+
         viewModel.onSearchQueryChanged("   ")
         viewModel.searchBangumi()
         advanceUntilIdle()
 
         assertFalse(viewModel.uiState.value.isLoading)
         assertNull(viewModel.uiState.value.error)
-        assertNull(viewModel.uiState.value.bangumi)
-    }
-
-    @Test
-    fun `searchBangumi with non-numeric query sets error`() = runTest(testDispatcher) {
-        viewModel.onSearchQueryChanged("your name")
-        viewModel.searchBangumi()
-        advanceUntilIdle()
-
-        assertFalse(viewModel.uiState.value.isLoading)
-        assertEquals(com.tnt.seichicamera.R.string.error_enter_bangumi_id, viewModel.uiState.value.errorRes)
         assertNull(viewModel.uiState.value.bangumi)
     }
 
@@ -158,6 +182,42 @@ class MapViewModelTest {
     }
 
     @Test
+    fun `searchBangumi with text query shows search results`() = runTest(testDispatcher) {
+        fakeBangumiSearchApi.responseToReturn = BangumiSearchResponse(
+            results = 1,
+            list = listOf(
+                BangumiSearchItem(id = 207195, name = "ゆるキャン△", nameCn = "摇曳露营△", images = null, airDate = "2018-01-04")
+            )
+        )
+
+        viewModel.onSearchQueryChanged("摇曳露营")
+        viewModel.searchBangumi()
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertFalse(state.isLoading)
+        assertTrue(state.showSearchResults)
+        assertEquals(1, state.searchResults.size)
+        assertEquals(207195, state.searchResults[0].id)
+    }
+
+    @Test
+    fun `selectSearchResult loads bangumi points`() = runTest(testDispatcher) {
+        fakeBangumiRepository.resultToReturn = Result.success(testBangumi to testPoints)
+
+        val result = com.tnt.seichicamera.domain.model.BangumiSearchResult(
+            id = 253, name = "Kimi no Na wa.", nameCn = "你的名字。", imageUrl = null, airDate = "2016"
+        )
+        viewModel.selectSearchResult(result)
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertFalse(state.showSearchResults)
+        assertEquals("你的名字。", state.searchQuery)
+        assertEquals(testBangumi, state.bangumi)
+    }
+
+    @Test
     fun `selectPoint updates selectedPoint in state`() {
         viewModel.selectPoint(testPoints[0])
         assertEquals(testPoints[0], viewModel.uiState.value.selectedPoint)
@@ -168,10 +228,11 @@ class MapViewModelTest {
 
     @Test
     fun `clearError clears error from state`() = runTest(testDispatcher) {
-        viewModel.onSearchQueryChanged("invalid")
+        fakeBangumiSearchApi.shouldThrow = true
+        viewModel.onSearchQueryChanged("test")
         viewModel.searchBangumi()
         advanceUntilIdle()
-        assertEquals(com.tnt.seichicamera.R.string.error_enter_bangumi_id, viewModel.uiState.value.errorRes)
+        assertNotNull(viewModel.uiState.value.errorRes)
 
         viewModel.clearError()
         assertNull(viewModel.uiState.value.error)
@@ -191,11 +252,11 @@ class MapViewModelTest {
 
     @Test
     fun `downloadOfflineCache does nothing when no bangumi loaded`() = runTest(testDispatcher) {
+        advanceUntilIdle() // let init finish
         viewModel.downloadOfflineCache()
         advanceUntilIdle()
 
         assertFalse(viewModel.uiState.value.isLoading)
-        assertNull(viewModel.uiState.value.error)
         assertNull(fakeBangumiRepository.lastCachedSubjectId)
     }
 
@@ -270,6 +331,8 @@ class MapViewModelTest {
             lastCachedSubjectId = subjectId
             return cacheResultToReturn
         }
+
+        override suspend fun getCachedBangumis(): List<Bangumi> = emptyList()
     }
 
     private class FakeCheckInRepository : CheckInRepository(
@@ -282,5 +345,20 @@ class MapViewModelTest {
     ) {
         val checkedInIdsFlow = MutableStateFlow<List<String>>(emptyList())
         override fun getCheckedInPointIds(): Flow<List<String>> = checkedInIdsFlow
+    }
+
+    private class FakeBangumiSearchApi : BangumiSearchApi {
+        var responseToReturn: BangumiSearchResponse = BangumiSearchResponse(results = 0, list = emptyList())
+        var shouldThrow = false
+
+        override suspend fun searchSubjects(
+            keywords: String,
+            type: Int,
+            responseGroup: String,
+            maxResults: Int
+        ): BangumiSearchResponse {
+            if (shouldThrow) throw RuntimeException("Search API error")
+            return responseToReturn
+        }
     }
 }

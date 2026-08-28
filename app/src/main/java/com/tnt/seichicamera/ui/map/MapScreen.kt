@@ -2,19 +2,32 @@ package com.tnt.seichicamera.ui.map
 
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -22,6 +35,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -33,14 +47,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil3.compose.AsyncImage
 import com.tnt.seichicamera.R
+import com.tnt.seichicamera.domain.model.BangumiSearchResult
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -63,6 +81,7 @@ fun MapScreen(
     val checkedInIds by viewModel.checkedInPointIds.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
+    val focusManager = LocalFocusManager.current
     val snackbarHostState = remember { SnackbarHostState() }
 
     val mapView = remember {
@@ -115,100 +134,179 @@ fun MapScreen(
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            // Search bar
-            OutlinedTextField(
-                value = uiState.searchQuery,
-                onValueChange = { viewModel.onSearchQueryChanged(it) },
-                placeholder = { Text(stringResource(R.string.search_bangumi)) },
-                trailingIcon = {
-                    IconButton(onClick = { viewModel.searchBangumi() }) {
+        // Layer 1: Full-screen map (bottom layer)
+        AndroidView(
+            factory = { mapView },
+            update = { view ->
+                val pointsChanged = lastRenderedPoints != uiState.points ||
+                        lastRenderedCheckedInIds != checkedInIds
+
+                if (pointsChanged) {
+                    lastRenderedPoints = uiState.points
+                    lastRenderedCheckedInIds = checkedInIds
+                    view.overlays.clear()
+
+                    uiState.points.forEach { point ->
+                        val marker = Marker(view).apply {
+                            position = GeoPoint(point.latitude, point.longitude)
+                            title = point.name ?: "Point"
+                            snippet = point.ep ?: ""
+                            setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+
+                            // Green if checked in, default otherwise
+                            if (point.id in checkedInIds) {
+                                // Use default marker (tinted via icon in future)
+                            }
+
+                            setOnMarkerClickListener { _, _ ->
+                                viewModel.selectPoint(point)
+                                true
+                            }
+                        }
+                        view.overlays.add(marker)
+                    }
+                    view.invalidate()
+                }
+
+                // Zoom to fit points ONLY when loaded bangumi changes
+                val currentBangumiId = uiState.bangumi?.id
+                if (currentBangumiId != null && currentBangumiId != lastCenteredBangumiId && uiState.points.isNotEmpty()) {
+                    lastCenteredBangumiId = currentBangumiId
+                    val avgLat = uiState.points.map { it.latitude }.average()
+                    val avgLng = uiState.points.map { it.longitude }.average()
+                    val zoom = uiState.bangumi?.zoom?.toDouble() ?: 12.0
+                    view.controller.setCenter(GeoPoint(avgLat, avgLng))
+                    view.controller.setZoom(zoom)
+                }
+            },
+            modifier = Modifier.fillMaxSize()
+        )
+
+        // Layer 2: Floating search bar + suggestions (top layer, over the map)
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .statusBarsPadding()
+                .padding(horizontal = 12.dp, vertical = 8.dp)
+                .align(Alignment.TopCenter)
+        ) {
+            // Floating search card
+            Surface(
+                shape = RoundedCornerShape(28.dp),
+                shadowElevation = 6.dp,
+                tonalElevation = 2.dp,
+                color = MaterialTheme.colorScheme.surface,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                OutlinedTextField(
+                    value = uiState.searchQuery,
+                    onValueChange = { viewModel.onSearchQueryChanged(it) },
+                    placeholder = { Text(stringResource(R.string.search_bangumi)) },
+                    leadingIcon = {
                         Icon(
                             Icons.Default.Search,
                             contentDescription = stringResource(R.string.search)
                         )
-                    }
-                },
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Number,
-                    imeAction = ImeAction.Search
-                ),
-                keyboardActions = KeyboardActions(onSearch = { viewModel.searchBangumi() }),
-                singleLine = true,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-            )
+                    },
+                    trailingIcon = {
+                        if (uiState.isSearching) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(20.dp),
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            IconButton(onClick = {
+                                focusManager.clearFocus()
+                                viewModel.searchBangumi()
+                            }) {
+                                Icon(
+                                    Icons.Default.Search,
+                                    contentDescription = stringResource(R.string.search)
+                                )
+                            }
+                        }
+                    },
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = ImeAction.Search
+                    ),
+                    keyboardActions = KeyboardActions(onSearch = {
+                        focusManager.clearFocus()
+                        viewModel.searchBangumi()
+                    }),
+                    singleLine = true,
+                    shape = RoundedCornerShape(28.dp),
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
 
-            // Title & Offline Download
-            uiState.bangumi?.let { bangumi ->
-                Row(
+            // Search suggestions dropdown
+            if (uiState.showSearchResults && uiState.searchResults.isNotEmpty()) {
+                Card(
+                    shape = RoundedCornerShape(16.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                        .padding(top = 4.dp)
+                        .heightIn(max = 300.dp)
                 ) {
-                    Text(
-                        text = bangumi.title,
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.weight(1f)
-                    )
-                    IconButton(onClick = { viewModel.downloadOfflineCache() }) {
-                        Icon(
-                            Icons.Default.Download,
-                            contentDescription = stringResource(R.string.download_offline)
-                        )
+                    LazyColumn {
+                        items(uiState.searchResults) { result ->
+                            SearchResultItem(
+                                result = result,
+                                onClick = {
+                                    focusManager.clearFocus()
+                                    viewModel.selectSearchResult(result)
+                                }
+                            )
+                            if (result != uiState.searchResults.last()) {
+                                HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                            }
+                        }
                     }
                 }
             }
 
-            // Map
-            AndroidView(
-                factory = { mapView },
-                update = { view ->
-                    val pointsChanged = lastRenderedPoints != uiState.points ||
-                            lastRenderedCheckedInIds != checkedInIds
-
-                    if (pointsChanged) {
-                        lastRenderedPoints = uiState.points
-                        lastRenderedCheckedInIds = checkedInIds
-                        view.overlays.clear()
-
-                        uiState.points.forEach { point ->
-                            val marker = Marker(view).apply {
-                                position = GeoPoint(point.latitude, point.longitude)
-                                title = point.name ?: "Point"
-                                snippet = point.ep ?: ""
-                                setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-
-                                // Green if checked in, default otherwise
-                                if (point.id in checkedInIds) {
-                                    // Use default marker (tinted via icon in future)
-                                }
-
-                                setOnMarkerClickListener { _, _ ->
-                                    viewModel.selectPoint(point)
-                                    true
-                                }
-                            }
-                            view.overlays.add(marker)
+            // Bangumi title bar (shows current loaded anime)
+            uiState.bangumi?.let { bangumi ->
+                Surface(
+                    shape = RoundedCornerShape(16.dp),
+                    shadowElevation = 4.dp,
+                    tonalElevation = 1.dp,
+                    color = MaterialTheme.colorScheme.surface,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = bangumi.title,
+                            style = MaterialTheme.typography.titleSmall,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f)
+                        )
+                        if (uiState.points.isNotEmpty()) {
+                            Text(
+                                text = "${uiState.points.size}",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         }
-                        view.invalidate()
+                        IconButton(onClick = { viewModel.downloadOfflineCache() }) {
+                            Icon(
+                                Icons.Default.Download,
+                                contentDescription = stringResource(R.string.download_offline),
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
                     }
-
-                    // Zoom to fit points ONLY when loaded bangumi changes
-                    val currentBangumiId = uiState.bangumi?.id
-                    if (currentBangumiId != null && currentBangumiId != lastCenteredBangumiId && uiState.points.isNotEmpty()) {
-                        lastCenteredBangumiId = currentBangumiId
-                        val avgLat = uiState.points.map { it.latitude }.average()
-                        val avgLng = uiState.points.map { it.longitude }.average()
-                        val zoom = uiState.bangumi?.zoom?.toDouble() ?: 12.0
-                        view.controller.setCenter(GeoPoint(avgLat, avgLng))
-                        view.controller.setZoom(zoom)
-                    }
-                },
-                modifier = Modifier.fillMaxSize()
-            )
+                }
+            }
         }
 
         // Loading indicator
@@ -249,6 +347,59 @@ fun MapScreen(
                     }
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun SearchResultItem(
+    result: BangumiSearchResult,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // Thumbnail
+        result.imageUrl?.let { url ->
+            AsyncImage(
+                model = url,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(6.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+        }
+
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = result.nameCn ?: result.name,
+                style = MaterialTheme.typography.bodyMedium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            if (result.nameCn != null && result.nameCn != result.name) {
+                Text(
+                    text = result.name,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+
+        result.airDate?.takeIf { it.isNotBlank() }?.let { date ->
+            Text(
+                text = date.take(4), // Show just the year
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }

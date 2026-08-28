@@ -31,7 +31,7 @@
     <string name="nav_map">マップ</string>
     <string name="nav_camera">カメラ</string>
     <string name="nav_settings">設定</string>
-    <string name="search_bangumi">Bangumi IDで検索</string>
+    <string name="search_bangumi">アニメ名または Bangumi ID で検索</string>
     <string name="search">検索</string>
     <string name="check_in">チェックイン</string>
     <string name="checked_in">チェックイン済</string>
@@ -58,4 +58,7 @@
     <string name="error_cache_failed">キャッシュ失敗：%1$s</string>
     <string name="unknown_point">不明なスポット</string>
     <string name="data_source_view_source">データ元：Anitabi (元サイトを開く)</string>
+    <string name="search_bangumi_or_name">アニメ名または Bangumi ID で検索</string>
+    <string name="search_no_results">該当する結果がありません</string>
+    <string name="error_search_failed">検索失敗：%1$s</string>
 </resources>

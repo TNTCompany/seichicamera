@@ -1,6 +1,7 @@
 package com.tnt.seichicamera.di
 
 import com.tnt.seichicamera.data.remote.AnitabiApi
+import com.tnt.seichicamera.data.remote.BangumiSearchApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -12,6 +13,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import java.util.concurrent.TimeUnit
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Module
@@ -31,6 +33,13 @@ object NetworkModule {
         OkHttpClient.Builder()
             .connectTimeout(15, TimeUnit.SECONDS)
             .readTimeout(15, TimeUnit.SECONDS)
+            .addInterceptor { chain ->
+                chain.proceed(
+                    chain.request().newBuilder()
+                        .addHeader("User-Agent", "SeichiCamera/2.0 (https://github.com/TNTCompany/seichicamera)")
+                        .build()
+                )
+            }
             .addInterceptor(HttpLoggingInterceptor().apply {
                 level = HttpLoggingInterceptor.Level.BASIC
             })
@@ -38,7 +47,8 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideRetrofit(client: OkHttpClient, json: Json): Retrofit =
+    @Named("anitabi")
+    fun provideAnitabiRetrofit(client: OkHttpClient, json: Json): Retrofit =
         Retrofit.Builder()
             .baseUrl(AnitabiApi.BASE_URL)
             .client(client)
@@ -47,6 +57,21 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideAnitabiApi(retrofit: Retrofit): AnitabiApi =
+    fun provideAnitabiApi(@Named("anitabi") retrofit: Retrofit): AnitabiApi =
         retrofit.create(AnitabiApi::class.java)
+
+    @Provides
+    @Singleton
+    @Named("bangumi")
+    fun provideBangumiRetrofit(client: OkHttpClient, json: Json): Retrofit =
+        Retrofit.Builder()
+            .baseUrl(BangumiSearchApi.BASE_URL)
+            .client(client)
+            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+            .build()
+
+    @Provides
+    @Singleton
+    fun provideBangumiSearchApi(@Named("bangumi") retrofit: Retrofit): BangumiSearchApi =
+        retrofit.create(BangumiSearchApi::class.java)
 }
