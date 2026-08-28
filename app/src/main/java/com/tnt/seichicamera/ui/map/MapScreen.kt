@@ -90,6 +90,7 @@ fun MapScreen(
             setMultiTouchControls(true)
             controller.setZoom(5.0)
             controller.setCenter(GeoPoint(36.0, 138.0)) // Japan center
+            onResume() // Force resume immediately
         }
     }
 
@@ -144,7 +145,7 @@ fun MapScreen(
                 if (pointsChanged) {
                     lastRenderedPoints = uiState.points
                     lastRenderedCheckedInIds = checkedInIds
-                    view.overlays.clear()
+                    view.overlays.removeAll { it is Marker }
 
                     uiState.points.forEach { point ->
                         val marker = Marker(view).apply {
