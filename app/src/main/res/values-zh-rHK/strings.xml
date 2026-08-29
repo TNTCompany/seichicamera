@@ -4,6 +4,7 @@
     <string name="transparency">透明度</string>
     <string name="mirror">鏡像</string>
     <string name="reset">重設</string>
+    <string name="remove_overlay_image">移除參考圖</string>
     <string name="grid">網格</string>
     <string name="settings">設定</string>
     <string name="photo_saved">相片已儲存</string>
@@ -17,4 +18,49 @@
     <string name="pref_lang_default">跟隨系統</string>
     <string name="pref_header_about">關於</string>
     <string name="pref_title_version">版本</string>
+    <string name="version_number">2.0.0</string>
+
+    <string name="gallery">相簿</string>
+    <string name="flip_camera">翻轉鏡頭</string>
+    <string name="flash_on">閃光燈：開</string>
+    <string name="flash_off">閃光燈：關</string>
+    <string name="tap_to_focus">點擊對焦</string>
+    <string name="pref_title_save_grid">儲存網格線狀態</string>
+    <string name="pref_summary_save_grid">啟動應用時自動顯示網格線</string>
+
+    <!-- New strings for v2 -->
+    <string name="nav_map">地圖</string>
+    <string name="nav_camera">相機</string>
+    <string name="nav_settings">設定</string>
+    <string name="search_bangumi">搜尋動漫名稱或 Bangumi ID</string>
+    <string name="search">搜尋</string>
+    <string name="check_in">打卡</string>
+    <string name="checked_in">已打卡</string>
+    <string name="generate_comparison">生成對比圖</string>
+    <string name="navigate_to">導航</string>
+    <string name="shoot_with_image">用這張圖拍攝</string>
+    <string name="reference_images">參考圖</string>
+    <string name="reference_image_content_description">參考圖 %1$d</string>
+    <string name="data_source">資料來源</string>
+    <string name="data_source_anitabi">Anitabi (CC BY-NC-SA 4.0)</string>
+    <string name="offline_cache">離線快取</string>
+    <string name="download_offline">離線下載</string>
+    <string name="clear_all_cache">清除所有快取</string>
+    <string name="clear_all_cache_confirm_title">清除所有快取？</string>
+    <string name="clear_all_cache_confirm_message">這將刪除所有離線資料。</string>
+    <string name="clear_all">清除全部</string>
+    <string name="delete_cache">刪除快取</string>
+    <string name="no_cached_data">暫無快取資料</string>
+    <string name="cancel">取消</string>
+    <string name="close">關閉</string>
+    <string name="capture">拍攝</string>
+    <string name="share_comparison">分享對比圖</string>
+    <string name="error_enter_bangumi_id">請輸入有效的 Bangumi 作品 ID (數字)</string>
+    <string name="error_unknown">未知錯誤</string>
+    <string name="error_cache_failed">快取失敗：%1$s</string>
+    <string name="unknown_point">未知點位</string>
+    <string name="data_source_view_source">資料來源：Anitabi (檢視源站)</string>
+    <string name="search_bangumi_or_name">搜尋動漫名稱或 Bangumi ID</string>
+    <string name="search_no_results">未搵到相關結果</string>
+    <string name="error_search_failed">搜尋失敗：%1$s</string>
 </resources>

@@ -4,6 +4,7 @@
     <string name="transparency">透明度</string>
     <string name="mirror">镜像</string>
     <string name="reset">重置</string>
+    <string name="remove_overlay_image">移除参考图</string>
     <string name="grid">网格</string>
     <string name="settings">设置</string>
     <string name="photo_saved">照片已保存</string>
@@ -17,4 +18,49 @@
     <string name="pref_lang_default">跟随系统</string>
     <string name="pref_header_about">关于</string>
     <string name="pref_title_version">版本</string>
+    <string name="version_number">2.0.0</string>
+
+    <string name="gallery">相册</string>
+    <string name="flip_camera">翻转镜头</string>
+    <string name="flash_on">闪光灯：开</string>
+    <string name="flash_off">闪光灯：关</string>
+    <string name="tap_to_focus">点击对焦</string>
+    <string name="pref_title_save_grid">保存网格线状态</string>
+    <string name="pref_summary_save_grid">启动应用时自动显示网格线</string>
+
+    <!-- New strings for v2 -->
+    <string name="nav_map">地图</string>
+    <string name="nav_camera">相机</string>
+    <string name="nav_settings">设置</string>
+    <string name="search_bangumi">搜索动漫名称或 Bangumi ID</string>
+    <string name="search">搜索</string>
+    <string name="check_in">打卡</string>
+    <string name="checked_in">已打卡</string>
+    <string name="generate_comparison">生成对比图</string>
+    <string name="navigate_to">导航</string>
+    <string name="shoot_with_image">用这张图拍摄</string>
+    <string name="reference_images">参考图</string>
+    <string name="reference_image_content_description">参考图 %1$d</string>
+    <string name="data_source">数据来源</string>
+    <string name="data_source_anitabi">Anitabi (CC BY-NC-SA 4.0)</string>
+    <string name="offline_cache">离线缓存</string>
+    <string name="download_offline">离线下载</string>
+    <string name="clear_all_cache">清除所有缓存</string>
+    <string name="clear_all_cache_confirm_title">清除所有缓存？</string>
+    <string name="clear_all_cache_confirm_message">这将删除所有离线数据。</string>
+    <string name="clear_all">清除全部</string>
+    <string name="delete_cache">删除缓存</string>
+    <string name="no_cached_data">暂无缓存数据</string>
+    <string name="cancel">取消</string>
+    <string name="close">关闭</string>
+    <string name="capture">拍摄</string>
+    <string name="share_comparison">分享对比图</string>
+    <string name="error_enter_bangumi_id">请输入有效的 Bangumi 作品 ID (数字)</string>
+    <string name="error_unknown">未知错误</string>
+    <string name="error_cache_failed">缓存失败：%1$s</string>
+    <string name="unknown_point">未知点位</string>
+    <string name="data_source_view_source">数据来源：Anitabi (查看源站)</string>
+    <string name="search_bangumi_or_name">搜索动漫名称或 Bangumi ID</string>
+    <string name="search_no_results">未找到相关结果</string>
+    <string name="error_search_failed">搜索失败：%1$s</string>
 </resources>
