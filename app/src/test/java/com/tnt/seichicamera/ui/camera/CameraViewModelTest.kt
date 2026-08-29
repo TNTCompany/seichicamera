@@ -184,6 +184,27 @@ class CameraViewModelTest {
     }
 
     @Test
+    fun `clearOverlay removes every image and resets the overlay state`() {
+        viewModel.setOverlayImageUrls(
+            listOf("https://img.com/1.jpg", "https://img.com/2.jpg"),
+            startIndex = 1
+        )
+        viewModel.updateOverlayTransform(
+            translationX = 100f,
+            translationY = 50f,
+            scale = 3f,
+            rotation = 90f
+        )
+        viewModel.setOverlayAlpha(0.9f)
+        viewModel.toggleMirror()
+        viewModel.toggleEditing()
+
+        viewModel.clearOverlay()
+
+        assertEquals(OverlayState(), viewModel.overlayState.value)
+    }
+
+    @Test
     fun `toggleFlash toggles between OFF and ON`() {
         assertEquals(ImageCapture.FLASH_MODE_OFF, viewModel.uiState.value.flashMode)
 

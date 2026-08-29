@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.tnt.seichicamera.R
 import com.tnt.seichicamera.domain.model.SacredPoint
+import com.tnt.seichicamera.util.withAnitabiImagePlan
 
 @Composable
 fun PointDetailSheet(
@@ -87,8 +88,11 @@ fun PointDetailSheet(
             ) {
                 itemsIndexed(point.imageUrls) { index, url ->
                     AsyncImage(
-                        model = url.replace("h360", "h160"),
-                        contentDescription = "Reference image ${index + 1}",
+                        model = url.withAnitabiImagePlan("h160"),
+                        contentDescription = stringResource(
+                            R.string.reference_image_content_description,
+                            index + 1
+                        ),
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
                             .size(120.dp, 80.dp)

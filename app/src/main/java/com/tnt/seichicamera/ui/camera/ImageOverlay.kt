@@ -15,11 +15,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Flip
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
@@ -31,8 +33,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.tnt.seichicamera.R
 
 @Composable
 fun ImageOverlay(
@@ -41,6 +45,7 @@ fun ImageOverlay(
     onAlphaChange: (Float) -> Unit,
     onMirror: () -> Unit,
     onReset: () -> Unit,
+    onRemoveImage: () -> Unit,
     onPickImage: () -> Unit,
     onNextImage: () -> Unit,
     onPrevImage: () -> Unit,
@@ -141,6 +146,13 @@ fun ImageOverlay(
                         }
                         IconButton(onClick = onReset) {
                             Icon(Icons.Default.RestartAlt, "Reset", tint = Color.White)
+                        }
+                        IconButton(onClick = onRemoveImage) {
+                            Icon(
+                                Icons.Default.DeleteOutline,
+                                contentDescription = stringResource(R.string.remove_overlay_image),
+                                tint = MaterialTheme.colorScheme.error
+                            )
                         }
                     }
                 }

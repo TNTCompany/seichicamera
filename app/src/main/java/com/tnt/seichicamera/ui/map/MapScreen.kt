@@ -66,6 +66,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.tnt.seichicamera.domain.model.SacredPoint
 import com.tnt.seichicamera.ui.navigation.Screen
+import com.tnt.seichicamera.util.withAnitabiImagePlan
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
@@ -350,7 +351,9 @@ fun MapScreen(
                     },
                     onShootWithImage = { imageIndex ->
                         viewModel.selectPoint(null)
-                        val urls = point.imageUrls.joinToString(",")
+                        val urls = point.imageUrls
+                            .map { it.withAnitabiImagePlan("h360") }
+                            .joinToString(",")
                         navController.navigate(Screen.Camera.createRoute(imageUrls = urls, pointId = point.id))
                     }
                 )

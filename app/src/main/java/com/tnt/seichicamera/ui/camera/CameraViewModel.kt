@@ -122,6 +122,10 @@ class CameraViewModel @Inject constructor(
         }
     }
 
+    fun clearOverlay() {
+        _overlayState.value = OverlayState()
+    }
+
     fun nextImage() {
         _overlayState.update {
             val next = (it.currentImageIndex + 1).coerceAtMost(it.imageUrls.size - 1)
@@ -178,4 +182,3 @@ class CameraViewModel @Inject constructor(
         _shareEvent.value = null
     }
 }
-

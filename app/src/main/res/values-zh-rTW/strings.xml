@@ -4,6 +4,7 @@
     <string name="transparency">透明度</string>
     <string name="mirror">鏡像</string>
     <string name="reset">重設</string>
+    <string name="remove_overlay_image">移除參考圖</string>
     <string name="grid">網格</string>
     <string name="settings">設定</string>
     <string name="photo_saved">相片已儲存</string>
@@ -39,6 +40,7 @@
     <string name="navigate_to">導航</string>
     <string name="shoot_with_image">用這張圖拍攝</string>
     <string name="reference_images">參考圖</string>
+    <string name="reference_image_content_description">參考圖 %1$d</string>
     <string name="data_source">資料來源</string>
     <string name="data_source_anitabi">Anitabi (CC BY-NC-SA 4.0)</string>
     <string name="offline_cache">離線快取</string>

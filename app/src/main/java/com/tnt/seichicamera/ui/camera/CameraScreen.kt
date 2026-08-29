@@ -203,6 +203,7 @@ fun CameraScreen(
                 onAlphaChange = { viewModel.setOverlayAlpha(it) },
                 onMirror = { viewModel.toggleMirror() },
                 onReset = { viewModel.resetOverlay() },
+                onRemoveImage = { viewModel.clearOverlay() },
                 onPickImage = {
                     pickMediaLauncher.launch(
                         PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
